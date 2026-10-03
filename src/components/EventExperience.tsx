@@ -128,12 +128,12 @@ export function EventExperience() {
       </section>
 
       <section className="speaker-stage" id="speakers">
-        <div className="speaker-backdrop" aria-hidden><AnimatePresence mode="wait"><motion.p key={speaker.id} initial={{ opacity: 0, x: 80 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -80 }} transition={{ duration: 0.65, ease: [0.16, 1, 0.3, 1] }}>{speaker.talk}</motion.p></AnimatePresence></div>
+        <div className="speaker-backdrop" aria-hidden><AnimatePresence mode="wait"><motion.div key={speaker.id} initial={{ opacity: 0, x: 80, clipPath: "inset(0 0 100% 0)" }} animate={{ opacity: 1, x: 0, clipPath: "inset(0 0 0% 0)" }} exit={{ opacity: 0, x: -80, clipPath: "inset(100% 0 0 0)" }} transition={{ duration: 0.9, delay: 0.42, ease: [0.16, 1, 0.3, 1] }}><p>{speaker.talk}</p><span>{speaker.manifesto}</span></motion.div></AnimatePresence></div>
         <div className="speaker-heading"><p className="eyebrow">Voices on the red circle</p><h2>The speakers</h2></div>
         <div className="speaker-visual">
           <div className="speaker-spotlight" />
           <AnimatePresence mode="wait">
-            <motion.button key={speaker.id} className="speaker-portrait" initial={{ opacity: 0, x: 180, filter: "brightness(0) blur(6px)" }} animate={{ opacity: 1, x: 0, filter: "brightness(1) blur(0px)" }} exit={{ opacity: 0, x: -150, filter: "brightness(0) blur(5px)" }} transition={{ duration: 0.75, ease: [0.16, 1, 0.3, 1] }} onClick={() => setSelectedSpeaker(speaker)} aria-label={`Open ${speaker.name} details`}>
+            <motion.button key={speaker.id} className="speaker-portrait" initial={{ opacity: 0, x: 260, filter: "brightness(0) contrast(1.3) blur(4px)" }} animate={{ opacity: [0, 1, 1], x: [260, 0, 0], filter: ["brightness(0) contrast(1.3) blur(4px)", "brightness(0) contrast(1.3) blur(0px)", "brightness(1) contrast(1.12) blur(0px)"] }} exit={{ opacity: [1, 0.9, 0], x: [0, -20, -230], filter: ["brightness(1) contrast(1.12) blur(0px)", "brightness(0) contrast(1.3) blur(0px)", "brightness(0) contrast(1.3) blur(5px)"] }} transition={{ duration: 1.15, times: [0, 0.58, 1], ease: [0.16, 1, 0.3, 1] }} onPointerMove={(event) => { const rect = event.currentTarget.getBoundingClientRect(); event.currentTarget.style.setProperty("--speaker-x", `${((event.clientX - rect.left) / rect.width - 0.5) * 12}px`); event.currentTarget.style.setProperty("--speaker-y", `${((event.clientY - rect.top) / rect.height - 0.5) * 8}px`); }} onPointerLeave={(event) => { event.currentTarget.style.setProperty("--speaker-x", "0px"); event.currentTarget.style.setProperty("--speaker-y", "0px"); }} onClick={() => setSelectedSpeaker(speaker)} aria-label={`Open ${speaker.name} details`}>
               <img src={speaker.portrait} alt="" width={896} height={1344} loading="lazy" />
             </motion.button>
           </AnimatePresence>
