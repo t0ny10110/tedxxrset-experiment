@@ -16,7 +16,7 @@ function MaskedLines({ lines, className = "" }: { lines: string[]; className?: s
     <div ref={ref} className={className}>
       {lines.map((line, index) => (
         <span className="masked-line" key={line}>
-          <motion.span initial={{ y: "110%", filter: "blur(8px)" }} animate={inView ? { y: 0, filter: "blur(0px)" } : undefined} transition={{ duration: 0.9, delay: index * 0.11, ease: [0.16, 1, 0.3, 1] }}>{line}</motion.span>
+          <motion.span initial={{ y: "110%", filter: "blur(8px)" }} animate={inView ? { y: 0, filter: "blur(0px)" } : { y: "110%", filter: "blur(8px)" }} transition={{ duration: 0.9, delay: index * 0.11, ease: [0.16, 1, 0.3, 1] }}>{line}</motion.span>
         </span>
       ))}
     </div>
@@ -78,7 +78,7 @@ export function EventExperience() {
     };
   }, []);
 
-  const speaker = eventConfig.speakers[speakerIndex];
+  const speaker = eventConfig.speakers[speakerIndex] ?? eventConfig.speakers[0];
   const changeSpeaker = (direction: number) => setSpeakerIndex((current) => (current + direction + eventConfig.speakers.length) % eventConfig.speakers.length);
   const chapters = [
     { number: "I", title: "Before the idea", text: "A room waits. One red circle holds the promise of everything unsaid." },
@@ -86,6 +86,7 @@ export function EventExperience() {
     { number: "III", title: "Gathering", text: "A hundred perspectives arrive, ready to collide and connect." },
     { number: "IV", title: "The spark", text: "One voice steps forward. The known world begins to move." },
   ];
+  const activeChapter = chapters[chapter] ?? chapters[0];
 
   return (
     <main>
@@ -107,7 +108,7 @@ export function EventExperience() {
           <div className="journey-chapter" aria-live="polite">
             <AnimatePresence mode="wait">
               <motion.div key={chapter} initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -12 }} transition={{ duration: 0.45 }}>
-                <span>{chapters[chapter].number} / IV</span><h2>{chapters[chapter].title}</h2><p>{chapters[chapter].text}</p>
+                <span>{activeChapter.number} / IV</span><h2>{activeChapter.title}</h2><p>{activeChapter.text}</p>
               </motion.div>
             </AnimatePresence>
           </div>
