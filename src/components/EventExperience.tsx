@@ -78,7 +78,7 @@ export function EventExperience() {
     };
   }, []);
 
-  const speaker = eventConfig.speakers[speakerIndex] ?? eventConfig.speakers[0];
+  const speaker = eventConfig.speakers[speakerIndex];
   const changeSpeaker = (direction: number) => setSpeakerIndex((current) => (current + direction + eventConfig.speakers.length) % eventConfig.speakers.length);
   const chapters = [
     { number: "I", title: "Before the idea", text: "A room waits. One red circle holds the promise of everything unsaid." },
@@ -86,7 +86,8 @@ export function EventExperience() {
     { number: "III", title: "Gathering", text: "A hundred perspectives arrive, ready to collide and connect." },
     { number: "IV", title: "The spark", text: "One voice steps forward. The known world begins to move." },
   ];
-  const activeChapter = chapters[chapter] ?? chapters[0];
+  const activeChapter = chapters[chapter];
+  if (!speaker || !activeChapter) return null;
 
   return (
     <main>
