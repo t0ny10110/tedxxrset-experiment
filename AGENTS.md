@@ -8,3 +8,6 @@
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
+
+- Keep all replaceable event content in `src/lib/event-config.ts` so the experience remains presentation-only and easy to retheme.
+- Keep the WebGL stage isolated behind the client-only home route because React Three Fiber depends on browser rendering.
