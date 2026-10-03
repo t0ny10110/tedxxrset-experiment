@@ -35,7 +35,7 @@ export function EventExperience() {
   const [visualProgress, setVisualProgress] = useState(0);
   const [speakerIndex, setSpeakerIndex] = useState(0);
   const [selectedSpeaker, setSelectedSpeaker] = useState<Speaker | null>(null);
-  const activeScene = Math.min(SCENE_COUNT - 1, Math.floor(visualProgress * SCENE_COUNT));
+  const activeScene = Math.min(SCENE_COUNT - 1, Math.round(visualProgress * (SCENE_COUNT - 1)));
   const speaker = eventConfig.speakers[speakerIndex];
 
   useEffect(() => {
