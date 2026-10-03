@@ -1,23 +1,28 @@
-# Cinematic TEDx Event Experience
+# Fixed cinematic timeline
 
-## Build
-- Replace the placeholder homepage with one continuous, dark theatrical journey centered on a physical TEDx stage.
-- Add a full-screen Three.js scene with a red carpet, dimensional TEDx letters, stage architecture, lighting, haze, dust, audience silhouettes, and a speaker silhouette.
-- Drive the stage camera, lights, audience, and speaker reveal from scroll progress across the pre-show, ignition, gathering, and spark chapters.
-- Layer editorial story copy over the stage with masked line reveals and restrained transitions.
+## Experience
+- Replace the document-length journey and all vertically stacked sections with one fixed, full-viewport experience.
+- Organize the story as six reversible timeline states: Intro, The Idea, Speakers, The Experience, Event, and CTA.
+- Keep the WebGL stage continuously mounted so camera, lighting, particles, logo, audience, and speaker staging transform without page cuts.
+- Present each scene’s typography and controls as layered stage graphics, using masked transitions rather than section changes.
 
-## Speakers and Event Story
-- Create an interactive speaker stage with three placeholder profiles, keyboard/button navigation, spotlight transitions, large projected talk typography, and an expansive speaker detail view.
-- Add full-width visual chapters for talks, performances, networking, community, event information, ticket call-to-action, and a minimal footer.
-- Isolate all replaceable names, theme copy, profiles, dates, venue, schedule, links, and contact details in one configuration module.
+## Interaction
+- Capture desktop wheel input with a non-passive listener, normalize trackpad deltas, and accumulate them into a clamped 0–1 target.
+- Smooth the displayed timeline toward that target every frame so fast wheel input never causes jumps.
+- Map vertical touch swipes to the same target on mobile, with backward navigation supported.
+- Keep keyboard arrow/Page Up/Page Down navigation available and honor reduced-motion preferences.
+- Add a minimal `01 / 06` indicator and a thin timeline rail with direct scene selection.
 
-## Interaction and Responsiveness
-- Add a smooth custom cursor and magnetic ticket controls for precise pointer devices.
-- Add subtle pointer parallax, ambient breathing, drifting particles, scroll progress, and reduced-motion/mobile fallbacks.
-- Keep the experience usable with keyboard navigation, visible focus states, semantic controls, and screen-reader labels.
+## Speaker stage
+- Preserve the step-in choreography inside Scene 03: the outgoing speaker dissolves into shadow, the next enters from the wing, warms into photography, and syncs with backdrop typography.
+- Keep speaker detail access and previous/next speaker controls available only while the Speakers scene is active.
 
-## Technical Details
-- Use React Three Fiber with client-only rendering, capped pixel density, instancing, bounded particle counts, and proper cleanup.
-- Use local geometry and CSS atmosphere rather than remote runtime assets, avoiding loading failures.
-- Define a cinematic semantic token system and route-specific social metadata.
-- Verify compilation, desktop and mobile rendering, interactions, animation state, and browser console cleanliness.
+## Technical details
+- Drive camera position, camera target, field of view, environment groups, lights, audience, speaker silhouette, logo glow, and dust response from the smoothed timeline ref inside the Three.js frame loop.
+- Keep all replaceable event copy and speaker data in the existing event configuration file.
+- Retain the client-only route and performance caps, with a styled non-WebGL fallback.
+- Remove obsolete scrolling layout CSS and lock the document to the viewport.
+
+## Verification
+- Verify wheel, trackpad-style deltas, reverse travel, touch swipes, keyboard controls, speaker switching, and CTA access.
+- Check desktop and phone viewports for clipping or overflow, then confirm clean browser and build diagnostics.
