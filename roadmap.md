@@ -1,6 +1,7 @@
 # Roadmap
 
-- [x] Build the scroll-driven physical TEDx stage journey.
-- [x] Refine speaker step-in choreography: shadow exit, wing entrance, warm key light, photographic reveal, mouse parallax, synchronized backdrop type.
-- [x] Complete responsive styling and reduced-motion fallbacks.
-- [x] Verify desktop/mobile rendering, interaction, and browser errors.
+- [ ] Replace vertical document scrolling with a fixed six-scene cinematic timeline.
+- [ ] Map wheel, trackpad, touch swipe, and keyboard input to reversible virtual progress.
+- [ ] Drive WebGL camera, lighting, particles, and stage objects from the smoothed timeline.
+- [ ] Preserve speaker step-in choreography and event interactions inside the scene system.
+- [ ] Verify desktop/mobile rendering, interaction, and browser errors.

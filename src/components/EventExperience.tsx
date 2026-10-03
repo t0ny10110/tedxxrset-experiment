@@ -1,5 +1,5 @@
-import { AnimatePresence, motion, useInView } from "motion/react";
-import { ArrowLeft, ArrowRight, ArrowUpRight, CalendarDays, Clock3, MapPin, X } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
+import { ArrowLeft, ArrowRight, ArrowUpRight, CalendarDays, Clock3, Instagram, MapPin, X } from "lucide-react";
 import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
@@ -8,19 +8,10 @@ import { CustomCursor } from "./CustomCursor";
 import { MagneticLink } from "./MagneticLink";
 
 const StageCanvas = lazy(() => import("./StageCanvas").then((module) => ({ default: module.StageCanvas })));
+const SCENE_COUNT = eventConfig.scenes.length;
 
-function MaskedLines({ lines, className = "" }: { lines: string[]; className?: string }) {
-  const ref = useRef<HTMLDivElement>(null);
-  const inView = useInView(ref, { once: true, margin: "-15%" });
-  return (
-    <div ref={ref} className={className}>
-      {lines.map((line, index) => (
-        <span className="masked-line" key={line}>
-          <motion.span initial={{ y: "110%", filter: "blur(8px)" }} animate={inView ? { y: 0, filter: "blur(0px)" } : { y: "110%", filter: "blur(8px)" }} transition={{ duration: 0.9, delay: index * 0.11, ease: [0.16, 1, 0.3, 1] }}>{line}</motion.span>
-        </span>
-      ))}
-    </div>
-  );
+function clamp(value: number) {
+  return Math.max(0, Math.min(1, value));
 }
 
 function SpeakerDetail({ speaker, open, onOpenChange }: { speaker: Speaker; open: boolean; onOpenChange: (open: boolean) => void }) {
@@ -29,135 +20,126 @@ function SpeakerDetail({ speaker, open, onOpenChange }: { speaker: Speaker; open
       <DialogContent className="speaker-dialog max-w-none border-0 p-0" onOpenAutoFocus={(event) => event.preventDefault()}>
         <Button variant="ghost" size="icon" className="speaker-dialog-close" onClick={() => onOpenChange(false)} aria-label="Close speaker details"><X /></Button>
         <div className="speaker-dialog-portrait"><img src={speaker.portrait} alt={speaker.name} width={896} height={1344} /></div>
-        <div className="speaker-dialog-copy">
-          <p className="eyebrow">Featured speaker</p>
-          <DialogTitle>{speaker.name}</DialogTitle>
-          <DialogDescription>{speaker.role}</DialogDescription>
-          <blockquote>“{speaker.manifesto}”</blockquote>
-          <p>{speaker.bio}</p>
-          <div className="speaker-dialog-talk"><span>Talk</span><strong>{speaker.talk}</strong></div>
-        </div>
+        <div className="speaker-dialog-copy"><p className="eyebrow">Featured speaker</p><DialogTitle>{speaker.name}</DialogTitle><DialogDescription>{speaker.role}</DialogDescription><blockquote>“{speaker.manifesto}”</blockquote><p>{speaker.bio}</p><div className="speaker-dialog-talk"><span>Talk</span><strong>{speaker.talk}</strong></div></div>
       </DialogContent>
     </Dialog>
   );
 }
 
 export function EventExperience() {
-  const journeyRef = useRef<HTMLElement>(null);
+  const rootRef = useRef<HTMLElement>(null);
+  const targetProgress = useRef(0);
   const progress = useRef(0);
   const pointer = useRef({ x: 0, y: 0 });
-  const [chapter, setChapter] = useState(0);
+  const touchY = useRef<number | null>(null);
+  const [visualProgress, setVisualProgress] = useState(0);
   const [speakerIndex, setSpeakerIndex] = useState(0);
   const [selectedSpeaker, setSelectedSpeaker] = useState<Speaker | null>(null);
+  const activeScene = Math.min(SCENE_COUNT - 1, Math.floor(visualProgress * SCENE_COUNT));
+  const speaker = eventConfig.speakers[speakerIndex];
 
   useEffect(() => {
+    const root = rootRef.current;
+    if (!root) return;
     let frame = 0;
-    const update = () => {
-      const section = journeyRef.current;
-      if (!section) return;
-      const rect = section.getBoundingClientRect();
-      const distance = section.offsetHeight - window.innerHeight;
-      const next = distance > 0 ? Math.max(0, Math.min(1, -rect.top / distance)) : 0;
-      progress.current = next;
-      setChapter(Math.min(3, Math.floor(next * 4.05)));
+    let last = performance.now();
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    const advance = (delta: number) => {
+      targetProgress.current = clamp(targetProgress.current + delta);
     };
-    const onScroll = () => {
-      cancelAnimationFrame(frame);
-      frame = requestAnimationFrame(update);
+    const onWheel = (event: WheelEvent) => {
+      event.preventDefault();
+      const normalized = event.deltaY * (event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? 100 : 1);
+      advance(normalized * 0.00042);
     };
-    const onPointer = (event: PointerEvent) => {
-      pointer.current = { x: event.clientX / window.innerWidth - 0.5, y: event.clientY / window.innerHeight - 0.5 };
+    const onTouchStart = (event: TouchEvent) => { touchY.current = event.touches[0]?.clientY ?? null; };
+    const onTouchMove = (event: TouchEvent) => {
+      const nextY = event.touches[0]?.clientY;
+      if (touchY.current === null || nextY === undefined) return;
+      event.preventDefault();
+      advance((touchY.current - nextY) * 0.0016);
+      touchY.current = nextY;
     };
-    update();
-    window.addEventListener("scroll", onScroll, { passive: true });
+    const onTouchEnd = () => { touchY.current = null; };
+    const onPointer = (event: PointerEvent) => { pointer.current = { x: event.clientX / window.innerWidth - 0.5, y: event.clientY / window.innerHeight - 0.5 }; };
+    const onKey = (event: KeyboardEvent) => {
+      if (["ArrowDown", "PageDown", "Space", "ArrowUp", "PageUp", "Home", "End"].includes(event.code)) event.preventDefault();
+      if (["ArrowDown", "PageDown", "Space"].includes(event.code)) advance(1 / (SCENE_COUNT - 1));
+      if (["ArrowUp", "PageUp"].includes(event.code)) advance(-1 / (SCENE_COUNT - 1));
+      if (event.code === "Home") targetProgress.current = 0;
+      if (event.code === "End") targetProgress.current = 1;
+    };
+    const tick = (now: number) => {
+      const delta = Math.min((now - last) / 1000, 0.05);
+      last = now;
+      const smoothing = reduced ? 18 : 5.5;
+      progress.current += (targetProgress.current - progress.current) * (1 - Math.exp(-smoothing * delta));
+      if (Math.abs(targetProgress.current - progress.current) < 0.0001) progress.current = targetProgress.current;
+      setVisualProgress(progress.current);
+      frame = requestAnimationFrame(tick);
+    };
+
+    root.addEventListener("wheel", onWheel, { passive: false });
+    root.addEventListener("touchstart", onTouchStart, { passive: true });
+    root.addEventListener("touchmove", onTouchMove, { passive: false });
+    root.addEventListener("touchend", onTouchEnd);
     window.addEventListener("pointermove", onPointer, { passive: true });
+    window.addEventListener("keydown", onKey);
+    frame = requestAnimationFrame(tick);
     return () => {
-      window.removeEventListener("scroll", onScroll);
+      root.removeEventListener("wheel", onWheel);
+      root.removeEventListener("touchstart", onTouchStart);
+      root.removeEventListener("touchmove", onTouchMove);
+      root.removeEventListener("touchend", onTouchEnd);
       window.removeEventListener("pointermove", onPointer);
+      window.removeEventListener("keydown", onKey);
       cancelAnimationFrame(frame);
     };
   }, []);
 
-  const speaker = eventConfig.speakers[speakerIndex];
+  if (!speaker) return null;
   const changeSpeaker = (direction: number) => setSpeakerIndex((current) => (current + direction + eventConfig.speakers.length) % eventConfig.speakers.length);
-  const chapters = [
-    { number: "I", title: "Before the idea", text: "A room waits. One red circle holds the promise of everything unsaid." },
-    { number: "II", title: "Ignition", text: "The light finds the stage. Attention becomes a shared act." },
-    { number: "III", title: "Gathering", text: "A hundred perspectives arrive, ready to collide and connect." },
-    { number: "IV", title: "The spark", text: "One voice steps forward. The known world begins to move." },
-  ];
-  const activeChapter = chapters[chapter];
-  if (!speaker || !activeChapter) return null;
+  const sceneProgress = visualProgress * (SCENE_COUNT - 1);
 
   return (
-    <main>
+    <main ref={rootRef} className="cinematic-experience" aria-label={`${eventConfig.brand} interactive experience`}>
       <CustomCursor />
-      <header className="site-header">
-        <a className="brand" href="#top" aria-label={`${eventConfig.brand} home`}><strong>TED<sup>x</sup></strong><span>Northbridge</span></a>
-        <MagneticLink href="#tickets" className="header-ticket">Tickets <ArrowUpRight /></MagneticLink>
+      <div className="cinematic-canvas" aria-hidden><Suspense fallback={<div className="stage-fallback" />}><StageCanvas progress={progress} pointer={pointer} /></Suspense></div>
+      <div className="cinematic-vignette" aria-hidden />
+
+      <header className="cinematic-header">
+        <button className="brand cinematic-brand" onClick={() => { targetProgress.current = 0; }} aria-label="Return to intro"><strong>TED<sup>x</sup></strong><span>Rajagiri</span></button>
+        <span className="host-name">{eventConfig.host}</span>
+        <MagneticLink href={eventConfig.ticketUrl} className="header-ticket">Tickets <ArrowUpRight /></MagneticLink>
       </header>
 
-      <section ref={journeyRef} className="stage-journey" id="top" aria-label="Event story">
-        <div className="stage-sticky">
-          <div className="stage-canvas" aria-hidden><Suspense fallback={<div className="stage-fallback" />}><StageCanvas progress={progress} pointer={pointer} /></Suspense></div>
-          <div className="stage-vignette" />
-          <div className="hero-copy">
-            <p className="eyebrow">{eventConfig.date} · {eventConfig.location}</p>
-            <h1><span>TED<sup>x</sup></span> {eventConfig.theme}</h1>
-            <p className="hero-sub">An invitation to leave certainty at the door.</p>
-          </div>
-          <div className="journey-chapter" aria-live="polite">
-            <AnimatePresence mode="wait">
-              <motion.div key={chapter} initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -12 }} transition={{ duration: 0.45 }}>
-                <span>{activeChapter.number} / IV</span><h2>{activeChapter.title}</h2><p>{activeChapter.text}</p>
-              </motion.div>
-            </AnimatePresence>
-          </div>
-          <div className="scroll-cue"><span>Scroll to explore</span><i /></div>
-          <div className="chapter-rail">{chapters.map((item, index) => <span key={item.number} className={index === chapter ? "is-active" : ""} />)}</div>
-        </div>
-      </section>
+      <div className="scene-stack">
+        {eventConfig.scenes.map((scene, index) => {
+          const distance = Math.abs(sceneProgress - index);
+          const opacity = Math.max(0, 1 - distance * 1.7);
+          const direction = sceneProgress - index;
+          return (
+            <section key={scene.index} className={`cinematic-scene scene-${index + 1}${activeScene === index ? " is-active" : ""}`} aria-hidden={activeScene !== index} style={{ opacity, transform: `translate3d(0, ${direction * -48}px, 0) scale(${1 - Math.min(distance, 1) * 0.045})`, filter: `blur(${Math.min(distance * 10, 10)}px)` }}>
+              <div className="scene-copy"><p className="eyebrow">{scene.eyebrow}</p><h1>{scene.title}</h1><p className="scene-description">{scene.text}</p></div>
 
-      <section className="ideas-section">
-        <p className="eyebrow">The purpose</p>
-        <MaskedLines lines={["Ideas", "worth", "spreading."]} className="ideas-title" />
-        <p className="ideas-copy">Not answers handed down from a stage. New questions, made electric by a room full of curious minds.</p>
-      </section>
+              {index === 2 ? <div className="cinematic-speaker">
+                <div className="speaker-led" aria-hidden><AnimatePresence mode="wait"><motion.div key={speaker.id} initial={{ opacity: 0, clipPath: "inset(0 0 100% 0)" }} animate={{ opacity: 1, clipPath: "inset(0 0 0% 0)" }} exit={{ opacity: 0, clipPath: "inset(100% 0 0 0)" }} transition={{ duration: 0.8 }}><strong>{speaker.talk}</strong><span>{speaker.manifesto}</span></motion.div></AnimatePresence></div>
+                <AnimatePresence mode="wait"><motion.button key={speaker.id} className="cinematic-speaker-portrait" initial={{ opacity: 0, x: 240, filter: "brightness(0) blur(4px)" }} animate={{ opacity: [0, 1, 1], x: [240, 0, 0], filter: ["brightness(0) blur(4px)", "brightness(0) blur(0px)", "brightness(1) blur(0px)"] }} exit={{ opacity: [1, 0.8, 0], x: [0, -20, -220], filter: ["brightness(1) blur(0px)", "brightness(0) blur(0px)", "brightness(0) blur(5px)"] }} transition={{ duration: 1.1, times: [0, 0.58, 1] }} onClick={() => setSelectedSpeaker(speaker)} aria-label={`Open ${speaker.name} details`}><img src={speaker.portrait} alt="" width={896} height={1344} /></motion.button></AnimatePresence>
+                <div className="cinematic-speaker-meta"><span>{String(speakerIndex + 1).padStart(2, "0")} / {String(eventConfig.speakers.length).padStart(2, "0")}</span><h2>{speaker.name}</h2><p>{speaker.role}</p><button className="speaker-read" onClick={() => setSelectedSpeaker(speaker)}>Enter their idea <ArrowUpRight /></button></div>
+                <div className="cinematic-speaker-controls"><Button variant="outline" size="icon" onClick={() => changeSpeaker(-1)} aria-label="Previous speaker"><ArrowLeft /></Button><Button variant="outline" size="icon" onClick={() => changeSpeaker(1)} aria-label="Next speaker"><ArrowRight /></Button></div>
+              </div> : null}
 
-      <section className="theme-section">
-        <div className="theme-orbit" aria-hidden><span /><span /><i /></div>
-        <div className="theme-copy"><p className="eyebrow">2027 theme</p><MaskedLines lines={["Beyond", "the known"]} className="theme-title" /><p>Progress begins at the edge of what we understand. Together, we cross that edge.</p></div>
-      </section>
+              {index === 3 ? <div className="experience-marquee">{eventConfig.experience.map((item) => <div key={item.index}><span>{item.index}</span><strong>{item.name}</strong><p>{item.text}</p></div>)}</div> : null}
+              {index === 4 ? <div className="event-facts"><div><CalendarDays /><span>Date</span><strong>{eventConfig.date}</strong></div><div><Clock3 /><span>Time</span><strong>{eventConfig.time}</strong></div><div><MapPin /><span>Venue</span><strong>{eventConfig.venue}</strong><small>{eventConfig.location}</small></div></div> : null}
+              {index === 5 ? <div className="cinematic-cta"><MagneticLink href={eventConfig.ticketUrl} className="ticket-cta"><span>Get your ticket</span><ArrowUpRight /></MagneticLink><a className="instagram-link" href={eventConfig.socials[0]?.href} target="_blank" rel="noreferrer"><Instagram /> @tedxrset</a></div> : null}
+            </section>
+          );
+        })}
+      </div>
 
-      <section className="speaker-stage" id="speakers">
-        <div className="speaker-backdrop" aria-hidden><AnimatePresence mode="wait"><motion.div key={speaker.id} initial={{ opacity: 0, x: 80, clipPath: "inset(0 0 100% 0)" }} animate={{ opacity: 1, x: 0, clipPath: "inset(0 0 0% 0)" }} exit={{ opacity: 0, x: -80, clipPath: "inset(100% 0 0 0)" }} transition={{ duration: 0.9, delay: 0.42, ease: [0.16, 1, 0.3, 1] }}><p>{speaker.talk}</p><span>{speaker.manifesto}</span></motion.div></AnimatePresence></div>
-        <div className="speaker-heading"><p className="eyebrow">Voices on the red circle</p><h2>The speakers</h2></div>
-        <div className="speaker-visual">
-          <div className="speaker-spotlight" />
-          <AnimatePresence mode="wait">
-            <motion.button key={speaker.id} className="speaker-portrait" initial={{ opacity: 0, x: 260, filter: "brightness(0) contrast(1.3) blur(4px)" }} animate={{ opacity: [0, 1, 1], x: [260, 0, 0], filter: ["brightness(0) contrast(1.3) blur(4px)", "brightness(0) contrast(1.3) blur(0px)", "brightness(1) contrast(1.12) blur(0px)"] }} exit={{ opacity: [1, 0.9, 0], x: [0, -20, -230], filter: ["brightness(1) contrast(1.12) blur(0px)", "brightness(0) contrast(1.3) blur(0px)", "brightness(0) contrast(1.3) blur(5px)"] }} transition={{ duration: 1.15, times: [0, 0.58, 1], ease: [0.16, 1, 0.3, 1] }} onPointerMove={(event) => { const rect = event.currentTarget.getBoundingClientRect(); event.currentTarget.style.setProperty("--speaker-x", `${((event.clientX - rect.left) / rect.width - 0.5) * 12}px`); event.currentTarget.style.setProperty("--speaker-y", `${((event.clientY - rect.top) / rect.height - 0.5) * 8}px`); }} onPointerLeave={(event) => { event.currentTarget.style.setProperty("--speaker-x", "0px"); event.currentTarget.style.setProperty("--speaker-y", "0px"); }} onClick={() => setSelectedSpeaker(speaker)} aria-label={`Open ${speaker.name} details`}>
-              <img src={speaker.portrait} alt="" width={896} height={1344} loading="lazy" />
-            </motion.button>
-          </AnimatePresence>
-        </div>
-        <div className="speaker-meta"><span>{String(speakerIndex + 1).padStart(2, "0")} / {String(eventConfig.speakers.length).padStart(2, "0")}</span><h3>{speaker.name}</h3><p>{speaker.role}</p><button className="speaker-read" onClick={() => setSelectedSpeaker(speaker)}>Enter their idea <ArrowUpRight /></button></div>
-        <div className="speaker-controls"><Button variant="outline" size="icon" onClick={() => changeSpeaker(-1)} aria-label="Previous speaker"><ArrowLeft /></Button><Button variant="outline" size="icon" onClick={() => changeSpeaker(1)} aria-label="Next speaker"><ArrowRight /></Button></div>
-      </section>
-
-      <section className="experience-section">
-        <div className="experience-intro"><p className="eyebrow">Inside the day</p><h2>Not a conference.<br />A shift in perspective.</h2></div>
-        <div className="experience-list">{eventConfig.experience.map((item) => <article key={item.index}><span>{item.index}</span><h3>{item.name}</h3><p>{item.text}</p></article>)}</div>
-      </section>
-
-      <section className="info-section" id="information">
-        <div className="info-title"><p className="eyebrow">The invitation</p><h2>One day.<br />Leave different.</h2></div>
-        <div className="info-facts"><div><CalendarDays /><span>Date</span><strong>{eventConfig.date}</strong></div><div><Clock3 /><span>Time</span><strong>{eventConfig.time}</strong></div><div><MapPin /><span>Venue</span><strong>{eventConfig.venue}</strong><small>{eventConfig.location}</small></div></div>
-        <div className="schedule"><p className="eyebrow">Programme</p>{eventConfig.schedule.map((entry) => <div key={entry.time}><time>{entry.time}</time><span>{entry.item}</span></div>)}</div>
-      </section>
-
-      <section className="cta-section" id="tickets"><p className="eyebrow">The room is waiting</p><MaskedLines lines={["Ready to", "explore?"]} className="cta-title" /><MagneticLink href="mailto:tickets@tedxnorthbridge.example" className="ticket-cta"><span>Get your ticket</span><ArrowUpRight /></MagneticLink></section>
-
-      <footer><div className="footer-brand"><strong>TED<sup>x</sup></strong><span>Northbridge</span></div><p>{eventConfig.organizer}</p><a href={`mailto:${eventConfig.contact}`}>{eventConfig.contact}</a><nav aria-label="Social media">{eventConfig.socials.map((social) => <a key={social.label} href={social.href} target="_blank" rel="noreferrer">{social.label}</a>)}</nav><small>© 2027 TEDx Northbridge</small></footer>
+      <nav className="timeline-nav" aria-label="Cinematic scenes"><span className="scene-counter">{String(activeScene + 1).padStart(2, "0")} <i /> {String(SCENE_COUNT).padStart(2, "0")}</span><div className="timeline-track"><b style={{ transform: `scaleY(${visualProgress})` }} />{eventConfig.scenes.map((scene, index) => <button key={scene.index} className={activeScene === index ? "is-active" : ""} onClick={() => { targetProgress.current = index / (SCENE_COUNT - 1); }} aria-label={`Go to ${scene.label}`}><span>{scene.label}</span></button>)}</div></nav>
+      <div className="input-cue"><span>{visualProgress < 0.98 ? "Scroll or swipe to travel" : "Scroll up to return"}</span><i /></div>
       {selectedSpeaker ? <SpeakerDetail speaker={selectedSpeaker} open onOpenChange={(open) => { if (!open) setSelectedSpeaker(null); }} /> : null}
     </main>
   );

@@ -11,3 +11,4 @@
 
 - Keep all replaceable event content in `src/lib/event-config.ts` so the experience remains presentation-only and easy to retheme.
 - Keep the WebGL stage isolated behind the client-only home route because React Three Fiber depends on browser rendering.
+- Keep the home experience fixed to the viewport and drive its six narrative states from one virtual progress value so wheel and touch input never create document scrolling.
