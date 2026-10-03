@@ -78,9 +78,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "TEDx Northbridge" },
-      { name: "description", content: "Ideas worth spreading at TEDx Northbridge." },
-      { name: "author", content: "TEDx Northbridge" },
+      { title: "TEDx Rajagiri" },
+      { name: "description", content: "Ideas in Motion at TEDx Rajagiri." },
+      { name: "author", content: "TEDx Rajagiri" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],

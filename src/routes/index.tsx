@@ -5,10 +5,10 @@ export const Route = createFileRoute("/")({
   ssr: false,
   head: () => ({
     meta: [
-      { title: "TEDx Northbridge — Beyond the Known" },
-      { name: "description", content: "Step into Beyond the Known, a one-day TEDx experience of ideas, performance, and human connection." },
-      { property: "og:title", content: "TEDx Northbridge — Beyond the Known" },
-      { property: "og:description", content: "A cinematic TEDx experience where unfamiliar ideas take the stage." },
+      { title: "TEDx Rajagiri — Ideas in Motion" },
+      { name: "description", content: "Enter a cinematic TEDx Rajagiri experience of ideas, performance, and human connection." },
+      { property: "og:title", content: "TEDx Rajagiri — Ideas in Motion" },
+      { property: "og:description", content: "A cinematic TEDx experience where ideas move through the room." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
