@@ -3,7 +3,7 @@ import { Canvas, useFrame } from "@react-three/fiber";
 import { useMemo, useRef } from "react";
 import * as THREE from "three";
 
-type StageCanvasProps = { progress: React.RefObject<number>; pointer: React.RefObject<{ x: number; y: number }> };
+type StageCanvasProps = { progress: React.RefObject<number>; pointer: React.RefObject<{ x: number; y: number }>; speakerSwitch?: React.RefObject<number> | undefined; speakerHover?: React.RefObject<boolean> | undefined };
 const RED = "#eb0029";
 const DEEP_RED = "#74111f";
 const INK = "#050505";
@@ -62,7 +62,8 @@ function TedxMark({ progress }: { progress: React.RefObject<number> }) {
   </group>;
 }
 
-function World({ progress, pointer }: StageCanvasProps) {
+function World({ progress, pointer, speakerSwitch, speakerHover }: StageCanvasProps) {
+  const hoverMix = useRef(0);
   const world = useRef<THREE.Group>(null);
   const keyLight = useRef<THREE.SpotLight>(null);
   const redLight = useRef<THREE.PointLight>(null);
@@ -86,10 +87,16 @@ function World({ progress, pointer }: StageCanvasProps) {
     look.current.lerp(targetLook, 1 - Math.exp(-4.8 * delta)); camera.lookAt(look.current);
     const perspective = camera as THREE.PerspectiveCamera; perspective.fov = THREE.MathUtils.damp(perspective.fov, THREE.MathUtils.lerp(from.f, to.f, mix), 5, delta); perspective.updateProjectionMatrix();
     if (world.current) world.current.rotation.z = Math.sin(p * Math.PI * 2) * 0.012;
-    if (keyLight.current) { keyLight.current.intensity = 35 + range(p, .08, .42) * 155; keyLight.current.position.x = Math.sin(p * Math.PI * 3) * 4; keyLight.current.color.lerpColors(new THREE.Color(LIGHT), new THREE.Color("#ffd6ad"), range(p, .32, .58)); }
+    const sinceSwitch = speakerSwitch ? (performance.now() - speakerSwitch.current) / 1000 : 99;
+    const settle = range(sinceSwitch, .55, 1.5);
+    const dip = sinceSwitch < 1.5 ? 1 - Math.sin(Math.min(sinceSwitch / 1.5, 1) * Math.PI) * .55 : 1;
+    hoverMix.current = THREE.MathUtils.damp(hoverMix.current, speakerHover?.current ? 1 : 0, 5, delta);
+    const speakerZone = range(p, .32, .44) * (1 - range(p, .56, .7));
+    if (keyLight.current) { keyLight.current.intensity = (35 + range(p, .08, .42) * 155) * (1 - speakerZone * (1 - dip)) + speakerZone * hoverMix.current * 70; keyLight.current.position.x = Math.sin(p * Math.PI * 3) * 4 * (1 - speakerZone) + pointer.current.x * speakerZone * 1.2; keyLight.current.angle = .35 - speakerZone * hoverMix.current * .06; keyLight.current.color.lerpColors(new THREE.Color(LIGHT), new THREE.Color("#ffc08a"), range(p, .32, .58) * (speakerZone > .1 ? settle : 1)); }
+    if (world.current) { world.current.position.x = THREE.MathUtils.damp(world.current.position.x, pointer.current.x * -.25 * hoverMix.current * speakerZone, 3, delta); world.current.rotation.z += Math.sin(clock.elapsedTime * 2.2) * .004 * hoverMix.current * speakerZone; }
     if (redLight.current) redLight.current.intensity = 20 + Math.sin(p * Math.PI) * 75;
     if (speaker.current) { const reveal = range(p, .32, .44) * (1 - range(p, .56, .7)); speaker.current.position.y = -3 + reveal * 3; speaker.current.scale.setScalar(.95 + Math.sin(clock.elapsedTime * .9) * .008); }
-    if (rings.current) { rings.current.rotation.z = clock.elapsedTime * .035 + p * 1.4; rings.current.position.z = -12 - p * 5; }
+    if (rings.current) { rings.current.rotation.z = clock.elapsedTime * (.035 + hoverMix.current * .12) + p * 1.4; rings.current.scale.setScalar(1 + hoverMix.current * speakerZone * .08); rings.current.position.z = -12 - p * 5; }
   });
 
   return <group ref={world}>
@@ -108,6 +115,6 @@ function World({ progress, pointer }: StageCanvasProps) {
   </group>;
 }
 
-export function StageCanvas({ progress, pointer }: StageCanvasProps) {
-  return <Canvas shadows dpr={[1, 1.5]} camera={{ position: [0, 4.2, 16], fov: 45 }} gl={{ antialias: true, powerPreference: "high-performance" }}><color attach="background" args={[INK]} /><fogExp2 attach="fog" args={[INK, .03]} /><ambientLight intensity={.34} color="#6f7580" /><World progress={progress} pointer={pointer} /></Canvas>;
+export function StageCanvas({ progress, pointer, speakerSwitch, speakerHover }: StageCanvasProps) {
+  return <Canvas shadows dpr={[1, 1.5]} camera={{ position: [0, 4.2, 16], fov: 45 }} gl={{ antialias: true, powerPreference: "high-performance" }}><color attach="background" args={[INK]} /><fogExp2 attach="fog" args={[INK, .03]} /><ambientLight intensity={.34} color="#6f7580" /><World progress={progress} pointer={pointer} speakerSwitch={speakerSwitch} speakerHover={speakerHover} /></Canvas>;
 }
