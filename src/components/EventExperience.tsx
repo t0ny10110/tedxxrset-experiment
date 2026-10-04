@@ -61,12 +61,26 @@ export function EventExperience() {
     let last = performance.now();
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
+    let lastSpeakerScroll = -10000;
+    const scrollSpeaker = (dir: number) => {
+      if (sceneRef.current !== 2) return false;
+      const next = speakerRef.current + dir;
+      if (next < 0 || next >= eventConfig.speakers.length) return false;
+      const now = performance.now();
+      if (now - lastSpeakerScroll < SWITCH_MS) return true;
+      lastSpeakerScroll = now;
+      speakerSwitch.current = now;
+      setDirection(dir);
+      setSpeakerIndex(next);
+      return true;
+    };
     const advance = (delta: number) => {
       targetProgress.current = clamp(targetProgress.current + delta);
     };
     const onWheel = (event: WheelEvent) => {
       event.preventDefault();
       const normalized = event.deltaY * (event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? 100 : 1);
+      if (scrollSpeaker(normalized > 0 ? 1 : -1)) return;
       advance(normalized * 0.00042);
     };
     const onTouchStart = (event: TouchEvent) => { touchY.current = event.touches[0]?.clientY ?? null; };
