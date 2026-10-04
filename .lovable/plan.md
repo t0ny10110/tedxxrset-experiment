@@ -5,7 +5,6 @@
 - Generate 5 new placeholder speaker cutout photos that match the style of the current two.
 - Keep the walk in and out, but make it a fade. The outgoing speaker drifts left or right while fading away. The new speaker drifts in from the opposite side while fading in. No black silhouette, just soft opacity and a gentle blur.
 - Smoother switching: one shared easing curve. The screen text, light warm-up and photo fade all play on the same timing. Rapid clicks are ignored until the fade finishes, so nothing stacks or jumps.
-- Add small numbered dots (01–07) under the speaker name so you can jump straight to any speaker.
 
 ## 2. Three-stage reveal (from your sketch)
 Scrolling into the Speakers scene plays three stages:
