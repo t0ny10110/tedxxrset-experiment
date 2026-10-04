@@ -39,6 +39,12 @@ Stage 3  Full Stage   screen on, speaker in focus, audience lit, lights 100%
 - Footer line on the closing screen: TEDx Rajagiri, contact email, Instagram, and the "independently organized TED event" notice.
 - Fix the page title and description so they no longer say "Ideas in Motion".
 - Check on phone and desktop sizes for anything cut off.
+- Final cleanup so the site looks clean:
+  - Consistent spacing and alignment on every screen.
+  - Fewer competing effects, so only one focal point per screen.
+  - No overlapping text.
+  - Same button styles everywhere.
+  - Tidy edges, so nothing looks cluttered or busy.
 
 ## Technical details
 - New speaker entries and images go in the event content file. The images are placeholders until real photos arrive.
