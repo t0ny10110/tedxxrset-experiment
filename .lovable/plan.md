@@ -18,7 +18,8 @@ Stage 3  Full Stage   screen on, speaker in focus, audience lit, lights 100%
 - Two dark curtain panels part as the stage opens. In stage 3 a dim row of audience shapes lights up at the front edge of the stage.
 
 ## 3. TEDx type and homepage title
-- Switch every text on the site to a TED-style typeface: bold, tight, Helvetica-like. Use Inter Tight for headings and body, with Helvetica Neue as the backup. Large headings use heavy weight with tight letter spacing, like TED's own style.
+- Use a striking font pairing across the whole site. "Unbounded" for big headings: wide, heavy, futuristic display type that looks like stage lettering. "Space Grotesk" for body text and labels: sharp and modern. Headings use very tight letter spacing and huge sizes.
+- Everywhere "TEDx" appears, including the logo, the homepage title and the headings, "TED" shows in white or bold type and the "x" always shows in TED red.
 - Give the text bold colours. Big headings get a glowing gradient that moves slowly from hot TED red through ember orange to electric magenta. Small labels and numbers get a neon red glow. Speaker talk titles on the stage screen glow in warm amber and red, like real LED light. Each scene gets its own accent colour, so the colours shift as you move through the site:
   - Intro: red
   - Idea: magenta
