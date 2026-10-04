@@ -264,7 +264,7 @@ body, button, a { font-family: var(--font-sans); }
 .scene-title { background: linear-gradient(100deg, var(--ted-white) 0%, var(--ted-white) 35%, var(--scene-accent) 60%, var(--ted-white) 90%); background-size: 250% 100%; -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; animation: headingFlow 9s ease-in-out infinite; filter: drop-shadow(0 0 1.4rem color-mix(in oklab, var(--scene-accent) 28%, transparent)); }
 @keyframes headingFlow { 0%,100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
 .scene-copy .intro-title { width: 86vw; max-width: none; font-size: clamp(3rem, 11.5vw, 13rem); line-height: .86; letter-spacing: -.07em; white-space: nowrap; color: var(--ted-white); text-shadow: 0 0 3rem color-mix(in oklab, var(--ted-red) 35%, transparent); }
-.intro-x { font-weight: 500; font-size: .78em; color: #000; -webkit-text-fill-color: #000; }
+.intro-x { font-weight: 500; font-size: .78em; color: var(--ted-white); -webkit-text-fill-color: var(--ted-white); }
 .scene-3 .scene-copy h1, .scene-4 .scene-copy h1 { font-size: clamp(2.4rem, 4.2vw, 4.8rem); }
 .scene-5 .scene-copy h1 { font-size: clamp(3rem, 6.5vw, 7rem); }
 .scene-6 .scene-copy h1 { font-size: clamp(3rem, 8vw, 9rem); }
