@@ -21,12 +21,13 @@ Stage 3  Full Stage   screen on, speaker in focus, audience lit, lights 100%
 - Use a striking font pairing across the whole site. "Unbounded" for big headings: wide, heavy, futuristic display type that looks like stage lettering. "Space Grotesk" for body text and labels: sharp and modern. Headings use very tight letter spacing and huge sizes.
 - Everywhere "TEDx" appears, including the logo, the homepage title and the headings, "TED" shows in white or bold type and the "x" always shows in TED red.
 - Give the text bold colours. Big headings get a glowing gradient that moves slowly from hot TED red through ember orange to electric magenta. Small labels and numbers get a neon red glow. Speaker talk titles on the stage screen glow in warm amber and red, like real LED light. Each scene gets its own accent colour, so the colours shift as you move through the site:
-  - Intro: red
-  - Idea: magenta
-  - Speakers: amber
+  - Intro: TED red
+  - Idea: white
+  - Speakers: TED red
   - Experience: electric blue
-  - Event: violet
-  - Tickets: red
+  - Event: white
+  - Tickets: TED red
+  - All on deep black. Only TEDx red, white, blue and black are used.
 - Make the "TEDx x RSET" title on the first screen much bigger, about 1.6× its current size, filling most of the screen width. On phones it shrinks to fit without being cut off.
 
 ## 4. Ticket button
