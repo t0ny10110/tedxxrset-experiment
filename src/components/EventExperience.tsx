@@ -6,6 +6,7 @@ import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/compone
 import { eventConfig, type Speaker } from "@/lib/event-config";
 import { CustomCursor } from "./CustomCursor";
 import { MagneticLink } from "./MagneticLink";
+import WarpText from "./WarpText";
 
 const StageCanvas = lazy(() => import("./StageCanvas").then((module) => ({ default: module.StageCanvas })));
 const SCENE_COUNT = eventConfig.scenes.length;
@@ -121,7 +122,7 @@ export function EventExperience() {
           const direction = sceneProgress - index;
           return (
             <section key={scene.index} className={`cinematic-scene scene-${index + 1}${activeScene === index ? " is-active" : ""}`} aria-hidden={activeScene !== index} style={{ opacity, transform: `translate3d(0, ${direction * -48}px, 0) scale(${1 - Math.min(distance, 1) * 0.045})`, filter: `blur(${Math.min(distance * 10, 10)}px)` }}>
-              <div className="scene-copy"><p className="eyebrow">{scene.eyebrow}</p><h1>{scene.title}</h1><p className="scene-description">{scene.text}</p></div>
+              <div className="scene-copy"><p className="eyebrow">{scene.eyebrow}</p>{index === 0 ? <h1 className="intro-warp-heading"><WarpText text="TEDx x RSET" color="#f8f5ff" warpStrength={0.08} warpScale={1.7} speed={0.55} pointerInfluence={0.42} pointerStrength={0.38} refraction={0.018} ripple fontSize={116} fontWeight={800} style={{ height: "320px" }} fontFamily="inherit" letterSpacing={-0.06} lineHeight={0.9} /></h1> : <h1>{scene.title}</h1>}<p className="scene-description">{scene.text}</p></div>
 
               {index === 2 ? <div className="cinematic-speaker">
                 <div className="speaker-led" aria-hidden><AnimatePresence mode="wait"><motion.div key={speaker.id} initial={{ opacity: 0, clipPath: "inset(0 0 100% 0)" }} animate={{ opacity: 1, clipPath: "inset(0 0 0% 0)" }} exit={{ opacity: 0, clipPath: "inset(100% 0 0 0)" }} transition={{ duration: 0.8 }}><strong>{speaker.talk}</strong><span>{speaker.manifesto}</span></motion.div></AnimatePresence></div>
