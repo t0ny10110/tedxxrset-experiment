@@ -283,7 +283,7 @@ body, button, a { font-family: var(--font-sans); }
 .stage-audience i { width: 4.2rem; border-radius: 2rem 2rem 0 0; background: linear-gradient(#000, #000); box-shadow: 0 -1px 0 color-mix(in oklab, var(--ted-red) 45%, transparent); }
 .speaker-progress { display: block; height: 2px; width: 100%; margin-bottom: .9rem; background: var(--ted-red); transform-origin: right; box-shadow: 0 0 .6rem var(--ted-red); }
 .cinematic-speaker-meta h2 { font-family: var(--font-display); font-size: clamp(1.6rem, 2.6vw, 3rem); letter-spacing: -.04em; }
-.cinematic-speaker-meta > span, .experience-marquee span, .scene-counter { color: var(--scene-accent); text-shadow: 0 0 .6rem color-mix(in oklab, var(--scene-accent) 70%, transparent); }
+.cinematic-speaker-meta > span, .experience-marquee span { color: var(--scene-accent); text-shadow: 0 0 .6rem color-mix(in oklab, var(--scene-accent) 70%, transparent); }
 .experience-marquee { top: 26vh; bottom: 14vh; gap: 0 2rem; }
 .experience-marquee strong { font-family: var(--font-display); font-size: clamp(1.3rem, 2.1vw, 2.3rem); letter-spacing: -.03em; }
 .event-facts svg { color: var(--ted-red); }
