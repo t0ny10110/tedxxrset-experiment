@@ -6,7 +6,6 @@ import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/compone
 import { eventConfig, type Speaker } from "@/lib/event-config";
 import { CustomCursor } from "./CustomCursor";
 import { MagneticLink } from "./MagneticLink";
-import WarpText from "./WarpText";
 
 const StageCanvas = lazy(() => import("./StageCanvas").then((module) => ({ default: module.StageCanvas })));
 const SCENE_COUNT = eventConfig.scenes.length;
