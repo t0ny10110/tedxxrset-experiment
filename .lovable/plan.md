@@ -3,7 +3,7 @@
 ## 1. Speakers
 - Add 5 more speakers (7 total), all as clearly marked placeholders: "Speaker 3"–"Speaker 7", with "coming soon" text.
 - Generate 5 new placeholder speaker cutout photos that match the style of the current two.
-- Replace the walk-in from the side with a simple, smooth crossfade. The old photo fades out and the new one fades in at the same spot. Add a gentle lift and soft blur so it feels cinematic.
+- Keep the walk in and out, but make it a fade. The outgoing speaker drifts left or right while fading away. The new speaker drifts in from the opposite side while fading in. No black silhouette, just soft opacity and a gentle blur.
 - Smoother switching: one shared easing curve. The screen text, light warm-up and photo fade all play on the same timing. Rapid clicks are ignored until the fade finishes, so nothing stacks or jumps.
 - Add small numbered dots (01–07) under the speaker name so you can jump straight to any speaker.
 
