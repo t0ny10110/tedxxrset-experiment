@@ -49,6 +49,10 @@ export function EventExperience() {
   const [selectedSpeaker, setSelectedSpeaker] = useState<Speaker | null>(null);
   const activeScene = Math.min(SCENE_COUNT - 1, Math.round(visualProgress * (SCENE_COUNT - 1)));
   const speaker = eventConfig.speakers[speakerIndex];
+  const sceneRef = useRef(0);
+  const speakerRef = useRef(0);
+  sceneRef.current = activeScene;
+  speakerRef.current = speakerIndex;
 
   useEffect(() => {
     const root = rootRef.current;
@@ -57,12 +61,26 @@ export function EventExperience() {
     let last = performance.now();
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
+    let lastSpeakerScroll = -10000;
+    const scrollSpeaker = (dir: number) => {
+      if (sceneRef.current !== 2) return false;
+      const next = speakerRef.current + dir;
+      if (next < 0 || next >= eventConfig.speakers.length) return false;
+      const now = performance.now();
+      if (now - lastSpeakerScroll < SWITCH_MS) return true;
+      lastSpeakerScroll = now;
+      speakerSwitch.current = now;
+      setDirection(dir);
+      setSpeakerIndex(next);
+      return true;
+    };
     const advance = (delta: number) => {
       targetProgress.current = clamp(targetProgress.current + delta);
     };
     const onWheel = (event: WheelEvent) => {
       event.preventDefault();
       const normalized = event.deltaY * (event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? 100 : 1);
+      if (scrollSpeaker(normalized > 0 ? 1 : -1)) return;
       advance(normalized * 0.00042);
     };
     const onTouchStart = (event: TouchEvent) => { touchY.current = event.touches[0]?.clientY ?? null; };
@@ -70,15 +88,17 @@ export function EventExperience() {
       const nextY = event.touches[0]?.clientY;
       if (touchY.current === null || nextY === undefined) return;
       event.preventDefault();
-      advance((touchY.current - nextY) * 0.0016);
+      const delta = touchY.current - nextY;
+      if (scrollSpeaker(delta > 0 ? 1 : -1)) { touchY.current = nextY; return; }
+      advance(delta * 0.0016);
       touchY.current = nextY;
     };
     const onTouchEnd = () => { touchY.current = null; };
     const onPointer = (event: PointerEvent) => { pointer.current = { x: event.clientX / window.innerWidth - 0.5, y: event.clientY / window.innerHeight - 0.5 }; };
     const onKey = (event: KeyboardEvent) => {
       if (["ArrowDown", "PageDown", "Space", "ArrowUp", "PageUp", "Home", "End"].includes(event.code)) event.preventDefault();
-      if (["ArrowDown", "PageDown", "Space"].includes(event.code)) advance(1 / (SCENE_COUNT - 1));
-      if (["ArrowUp", "PageUp"].includes(event.code)) advance(-1 / (SCENE_COUNT - 1));
+      if (["ArrowDown", "PageDown", "Space"].includes(event.code) && !scrollSpeaker(1)) advance(1 / (SCENE_COUNT - 1));
+      if (["ArrowUp", "PageUp"].includes(event.code) && !scrollSpeaker(-1)) advance(-1 / (SCENE_COUNT - 1));
       if (event.code === "Home") targetProgress.current = 0;
       if (event.code === "End") targetProgress.current = 1;
     };
