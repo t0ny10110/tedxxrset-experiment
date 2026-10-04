@@ -265,7 +265,6 @@ body, button, a { font-family: var(--font-sans); }
 @keyframes headingFlow { 0%,100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
 .scene-copy .intro-title { width: 86vw; max-width: none; font-size: clamp(3rem, 11.5vw, 13rem); line-height: .86; letter-spacing: -.07em; white-space: nowrap; color: var(--ted-white); text-shadow: 0 0 3rem color-mix(in oklab, var(--ted-red) 35%, transparent); }
 .intro-x { font-weight: 500; font-size: .78em; }
-.scene-copy .intro-title .tedx-x { font-size: .78em; }
 .scene-3 .scene-copy h1, .scene-4 .scene-copy h1 { font-size: clamp(2.4rem, 4.2vw, 4.8rem); }
 .scene-5 .scene-copy h1 { font-size: clamp(3rem, 6.5vw, 7rem); }
 .scene-6 .scene-copy h1 { font-size: clamp(3rem, 8vw, 9rem); }
