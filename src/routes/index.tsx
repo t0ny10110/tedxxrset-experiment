@@ -5,10 +5,10 @@ export const Route = createFileRoute("/")({
   ssr: false,
   head: () => ({
     meta: [
-      { title: "TEDx Rajagiri — Ideas in Motion" },
-      { name: "description", content: "Enter a cinematic TEDx Rajagiri experience of ideas, performance, and human connection." },
-      { property: "og:title", content: "TEDx Rajagiri — Ideas in Motion" },
-      { property: "og:description", content: "A cinematic TEDx experience where ideas move through the room." },
+      { title: "TEDx Rajagiri — TEDx x RSET, 16 January 2027" },
+      { name: "description", content: "Step onto the TEDx Rajagiri stage: speakers, schedule and tickets for 16 January 2027 at RSET, Kochi." },
+      { property: "og:title", content: "TEDx Rajagiri — TEDx x RSET" },
+      { property: "og:description", content: "Speakers, schedule and tickets for TEDx Rajagiri at RSET, Kochi." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],

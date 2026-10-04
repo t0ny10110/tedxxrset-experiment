@@ -248,3 +248,63 @@ main::after { content: ""; position: fixed; inset: 0; z-index: 80; pointer-event
   .cinematic-header { padding: 1.1rem 1.2rem; grid-template-columns: 1fr auto; }.host-name { display: none; }.cinematic-scene { padding: 7rem 3.6rem 6rem 1.2rem; align-items: flex-start; }.scene-copy { width: 100%; }.scene-copy h1 { font-size: clamp(3.15rem, 15vw, 5.7rem); }.scene-copy .intro-warp-heading { width: 100%; height: min(30vh, 15rem); }.warp-text { min-height: 10rem; }.scene-description { margin-top: 1.2rem; max-width: 20rem; }.scene-2 { text-align: left; }.scene-2 h1,.scene-2 .scene-description { margin-left: 0; }.scene-3 > .scene-copy { left: 1.2rem; top: 14vh; width: calc(100% - 5rem); }.scene-3 .scene-copy h1 { font-size: 11vw; }.speaker-led { top: 37%; }.speaker-led strong { font-size: 11vw; }.speaker-led em { display: none; }.cinematic-speaker-portrait { width: 80vw; height: 64vh; left: 47%; margin-left: -40vw; }.cinematic-speaker-meta { left: 1.2rem; right: 4rem; bottom: 4.8rem; width: auto; text-align: left; }.cinematic-speaker-meta h2 { font-size: 1.8rem; }.cinematic-speaker-controls { left: auto; right: 3.6rem; bottom: 1.1rem; }.cinematic-speaker-controls button { width: 2.65rem; height: 2.65rem; }.scene-4 > .scene-copy { margin-top: 0; }.scene-4 .scene-copy h1 { font-size: 11vw; }.experience-marquee { left: 1.2rem; right: 3.7rem; top: 43vh; bottom: 5rem; }.experience-marquee > div { padding: .8rem .4rem; }.experience-marquee strong { font-size: 1.2rem; }.experience-marquee p { display: none; }.scene-5 .scene-copy { margin-top: 0; }.event-facts { left: 1.2rem; right: 3.8rem; bottom: 5rem; width: auto; }.scene-6 .scene-copy { width: 100%; margin-top: 10vh; }.scene-6 .scene-copy h1 { font-size: 17vw; }.cinematic-cta { bottom: 5.4rem; width: 100%; justify-content: center; gap: 1.2rem; }.ticket-cta { width: 7rem; }.timeline-nav { right: .8rem; }.timeline-track button span { display: none; }.input-cue { left: 1.2rem; bottom: 1.2rem; }.speaker-dialog { grid-template-columns: 1fr; grid-template-rows: 40dvh 1fr; overflow-y: auto; }.speaker-dialog-copy { padding: 2rem 1.2rem 4rem; }.speaker-dialog-copy h2 { font-size: 3.2rem; }.speaker-dialog-copy blockquote { margin: 1.5rem 0; font-size: 1.35rem; }
 }
 @media (prefers-reduced-motion: reduce) { *,*::before,*::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; } }
+
+/* ===== Finishing pass: TEDx type, colour, stage reveal ===== */
+:root { --ted-red: oklch(0.61 0.25 24); --ted-blue: oklch(0.62 0.2 255); --ted-white: oklch(0.98 0.005 80); --scene-accent: var(--ted-red); --font-sans: "Space Grotesk", sans-serif; --font-display: "Unbounded", sans-serif; }
+@theme inline { --font-sans: "Space Grotesk", sans-serif; --font-display: "Unbounded", sans-serif; }
+body, button, a { font-family: var(--font-sans); }
+.scene-1, .scene-3, .scene-6 { --scene-accent: var(--ted-red); }
+.scene-2, .scene-5 { --scene-accent: var(--ted-white); }
+.scene-4 { --scene-accent: var(--ted-blue); }
+.tedx-word { color: var(--ted-white); -webkit-text-fill-color: var(--ted-white); font-weight: 900; }
+.tedx-x, .intro-x { color: var(--ted-red) !important; -webkit-text-fill-color: var(--ted-red); }
+.brand strong { font-family: var(--font-display); font-size: 1.35rem; letter-spacing: -.06em; color: var(--ted-white); }
+.eyebrow { color: var(--scene-accent) !important; text-shadow: 0 0 .9rem color-mix(in oklab, var(--scene-accent) 70%, transparent); }
+.scene-copy h1 { font-family: var(--font-display); font-size: clamp(2.8rem, 6.4vw, 7rem); line-height: .9; letter-spacing: -.055em; max-width: 12ch; }
+.scene-title { background: linear-gradient(100deg, var(--ted-white) 0%, var(--ted-white) 35%, var(--scene-accent) 60%, var(--ted-white) 90%); background-size: 250% 100%; -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; animation: headingFlow 9s ease-in-out infinite; filter: drop-shadow(0 0 1.4rem color-mix(in oklab, var(--scene-accent) 28%, transparent)); }
+@keyframes headingFlow { 0%,100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
+.scene-copy .intro-title { width: 86vw; max-width: none; font-size: clamp(3rem, 11.5vw, 13rem); line-height: .86; letter-spacing: -.07em; white-space: nowrap; color: var(--ted-white); text-shadow: 0 0 3rem color-mix(in oklab, var(--ted-red) 35%, transparent); }
+.intro-x { font-weight: 500; }
+.scene-3 .scene-copy h1, .scene-4 .scene-copy h1 { font-size: clamp(2.4rem, 4.2vw, 4.8rem); }
+.scene-5 .scene-copy h1 { font-size: clamp(3rem, 6.5vw, 7rem); }
+.scene-6 .scene-copy h1 { font-size: clamp(3rem, 8vw, 9rem); }
+.scene-description { margin-top: 1.6rem; }
+.speaker-led { color: transparent; }
+.speaker-led .led-inner { position: absolute; left: 0; right: 0; top: 0; }
+.speaker-led strong { font-family: var(--font-display); font-size: clamp(2.4rem, 5vw, 6rem); color: color-mix(in oklab, var(--ted-red) 30%, transparent); text-shadow: 0 0 2.5rem color-mix(in oklab, var(--ted-red) 40%, transparent), 0 0 .5rem rgba(255,180,110,.15); }
+.speaker-led em { color: rgba(255,190,120,.55); text-shadow: 0 0 .8rem rgba(255,150,80,.4); }
+.stage-led-wrap, .speaker-portrait-wrap { position: absolute; inset: 0; pointer-events: none; }
+.speaker-portrait-wrap > * { pointer-events: auto; }
+.speaker-portrait-wrap { z-index: 3; }
+.stage-curtain { position: absolute; z-index: 4; top: 0; bottom: 0; width: 50.5%; pointer-events: none; background: repeating-linear-gradient(90deg, #0a0204 0 2.4rem, #1b0508 2.4rem 3.4rem, #0a0204 3.4rem 4.8rem); box-shadow: inset 0 -12rem 8rem -4rem #000; transition: transform .12s linear; }
+.stage-curtain.left { left: 0; } .stage-curtain.right { right: 0; }
+.stage-status { position: absolute; z-index: 5; left: 50%; top: 52%; transform: translateX(-50%); margin: 0; font-size: .6rem; font-weight: 700; letter-spacing: .3em; text-transform: uppercase; color: rgba(255,255,255,.45); pointer-events: none; }
+.stage-audience { position: absolute; z-index: 6; left: 0; right: 0; bottom: -1.2rem; display: flex; justify-content: space-between; align-items: flex-end; padding: 0 2vw; pointer-events: none; }
+.stage-audience i { width: 4.2rem; border-radius: 2rem 2rem 0 0; background: linear-gradient(#000, #000); box-shadow: 0 -1px 0 color-mix(in oklab, var(--ted-red) 45%, transparent); }
+.speaker-progress { display: block; height: 2px; width: 100%; margin-bottom: .9rem; background: var(--ted-red); transform-origin: right; box-shadow: 0 0 .6rem var(--ted-red); }
+.cinematic-speaker-meta h2 { font-family: var(--font-display); font-size: clamp(1.6rem, 2.6vw, 3rem); letter-spacing: -.04em; }
+.cinematic-speaker-meta > span, .experience-marquee span, .scene-counter { color: var(--scene-accent); text-shadow: 0 0 .6rem color-mix(in oklab, var(--scene-accent) 70%, transparent); }
+.experience-marquee { top: 26vh; bottom: 14vh; gap: 0 2rem; }
+.experience-marquee strong { font-family: var(--font-display); font-size: clamp(1.3rem, 2.1vw, 2.3rem); letter-spacing: -.03em; }
+.event-facts svg { color: var(--ted-red); }
+.ticket-cta { width: auto; aspect-ratio: auto; border-radius: 0; padding: 1.15rem 2.6rem; gap: 1rem; font-size: .75rem; letter-spacing: .12em; background: var(--ted-red); }
+.ticket-cta:hover { background: color-mix(in oklab, var(--ted-red) 85%, white); }
+.ticket-cta svg { width: 1.1rem; }
+.cinematic-cta { bottom: 13vh; }
+.cinematic-footer { position: absolute; z-index: 6; left: 8vw; right: 8vw; bottom: 2rem; display: flex; flex-wrap: wrap; justify-content: center; gap: .6rem 2rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,.12); font-size: .62rem; letter-spacing: .08em; text-transform: uppercase; color: rgba(255,255,255,.45); }
+.cinematic-footer a { color: rgba(255,255,255,.7); text-decoration: none; }
+.cinematic-footer > span:first-child { color: var(--ted-white); font-weight: 700; }
+.input-cue { color: rgba(255,255,255,.32); font-size: .5rem; }
+.scene-6 .input-cue { display: none; }
+@media (max-width: 800px) {
+  .scene-copy .intro-title { width: 100%; font-size: 13vw; white-space: normal; }
+  .scene-copy h1 { font-size: 10vw; }
+  .stage-audience i { width: 2rem; }
+  .cinematic-cta { bottom: 7.5rem; }
+  .cinematic-footer { left: 1.2rem; right: 3.6rem; bottom: 2.6rem; gap: .3rem 1rem; font-size: .5rem; }
+  .ticket-cta { width: auto; padding: 1rem 1.6rem; }
+}
+.scene-copy .intro-title { width: auto; font-size: clamp(3rem, 9.6vw, 11rem); }
+.stage-audience { bottom: -.6rem; opacity: .9; }
+.stage-audience i { width: 3rem; height: 2.2rem !important; background: radial-gradient(circle at 50% 30%, #0b0b0b 40%, #000 70%); border-radius: 50% 50% 0 0; }
+@media (max-width: 800px) { .scene-copy .intro-title { font-size: 13vw; } .stage-audience i { width: 1.6rem; height: 1.4rem !important; } }

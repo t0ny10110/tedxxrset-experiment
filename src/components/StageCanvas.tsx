@@ -55,10 +55,10 @@ function TedxMark({ progress }: { progress: React.RefObject<number> }) {
   });
   const material = (color: string, index: number) => <meshStandardMaterial ref={(node) => { if (node) materials.current[index] = node; }} color={color} emissive={color} transparent opacity={0.2} roughness={0.45} metalness={0.2} />;
   return <group ref={group} position={[-0.4, 3.9, -6.2]} scale={1.2}>
-    <group position-x={-5.1}><mesh position={[0, 1.4, 0]}><boxGeometry args={[3.2, .72, .8]} />{material(RED, 0)}</mesh><mesh><boxGeometry args={[.72, 3.5, .8]} />{material(RED, 1)}</mesh></group>
-    <group position-x={-2.1}>{[1.4, 0, -1.4].map((y, i) => <mesh key={y} position={[.65, y, 0]}><boxGeometry args={[2.6, .66, .8]} />{material(RED, i + 2)}</mesh>)}<mesh><boxGeometry args={[.66, 3.5, .8]} />{material(RED, 5)}</mesh></group>
-    <group position-x={1.4}><mesh><boxGeometry args={[.7, 3.5, .8]} />{material(RED, 6)}</mesh><mesh position={[1.25, 0, 0]} rotation-z={-.42}><boxGeometry args={[.7, 3.65, .8]} />{material(RED, 7)}</mesh><mesh position={[2.5, 0, 0]} rotation-z={.42}><boxGeometry args={[.7, 3.65, .8]} />{material(RED, 8)}</mesh></group>
-    <group position-x={5.2} scale={.68}><mesh rotation-z={-.65}><boxGeometry args={[.58, 3.2, .58]} />{material(LIGHT, 9)}</mesh><mesh rotation-z={.65}><boxGeometry args={[.58, 3.2, .58]} />{material(LIGHT, 10)}</mesh></group>
+    <group position-x={-5.1}><mesh position={[0, 1.4, 0]}><boxGeometry args={[3.2, 0.7, 0.8]} />{material(RED, 0)}</mesh><mesh position={[0, -0.35, 0]}><boxGeometry args={[0.7, 2.8, 0.8]} />{material(RED, 1)}</mesh></group>
+    <group position-x={-2.1}><mesh position={[0, 0, 0]}><boxGeometry args={[0.7, 3.5, 0.8]} />{material(RED, 2)}</mesh><mesh position={[1.35, 1.4, 0]}><boxGeometry args={[2, 0.7, 0.8]} />{material(RED, 3)}</mesh><mesh position={[1.2, 0, 0]}><boxGeometry args={[1.7, 0.7, 0.8]} />{material(RED, 4)}</mesh><mesh position={[1.35, -1.4, 0]}><boxGeometry args={[2, 0.7, 0.8]} />{material(RED, 5)}</mesh></group>
+    <group position-x={1.4}><mesh position={[0, 0, 0]}><boxGeometry args={[0.7, 3.5, 0.8]} />{material(RED, 6)}</mesh><mesh position={[1.1, 1.4, 0]}><boxGeometry args={[1.5, 0.7, 0.8]} />{material(RED, 7)}</mesh><mesh position={[1.1, -1.4, 0]}><boxGeometry args={[1.5, 0.7, 0.8]} />{material(RED, 8)}</mesh><mesh position={[2.2, 0, 0]}><boxGeometry args={[0.7, 2.1, 0.8]} />{material(RED, 9)}</mesh></group>
+    <group position-x={5.2} scale={.68}><mesh rotation-z={-.65}><boxGeometry args={[.58, 3.2, 1.18]} />{material(LIGHT, 10)}</mesh><mesh rotation-z={.65}><boxGeometry args={[.58, 3.2, 1.18]} />{material(LIGHT, 11)}</mesh></group>
   </group>;
 }
 
@@ -88,11 +88,12 @@ function World({ progress, pointer, speakerSwitch, speakerHover }: StageCanvasPr
     const perspective = camera as THREE.PerspectiveCamera; perspective.fov = THREE.MathUtils.damp(perspective.fov, THREE.MathUtils.lerp(from.f, to.f, mix), 5, delta); perspective.updateProjectionMatrix();
     if (world.current) world.current.rotation.z = Math.sin(p * Math.PI * 2) * 0.012;
     const sinceSwitch = speakerSwitch ? (performance.now() - speakerSwitch.current) / 1000 : 99;
-    const settle = range(sinceSwitch, .55, 1.5);
-    const dip = sinceSwitch < 1.5 ? 1 - Math.sin(Math.min(sinceSwitch / 1.5, 1) * Math.PI) * .55 : 1;
+    const settle = range(sinceSwitch, .3, .9);
+    const dip = sinceSwitch < .9 ? 1 - Math.sin(Math.min(sinceSwitch / .9, 1) * Math.PI) * .45 : 1;
+    const stageLights = .15 + range(p, .25, .31) * .25 + range(p, .33, .385) * .6;
     hoverMix.current = THREE.MathUtils.damp(hoverMix.current, speakerHover?.current ? 1 : 0, 5, delta);
     const speakerZone = range(p, .32, .44) * (1 - range(p, .56, .7));
-    if (keyLight.current) { keyLight.current.intensity = (35 + range(p, .08, .42) * 155) * (1 - speakerZone * (1 - dip)) + speakerZone * hoverMix.current * 70; keyLight.current.position.x = Math.sin(p * Math.PI * 3) * 4 * (1 - speakerZone) + pointer.current.x * speakerZone * 1.2; keyLight.current.angle = .35 - speakerZone * hoverMix.current * .06; keyLight.current.color.lerpColors(new THREE.Color(LIGHT), new THREE.Color("#ffc08a"), range(p, .32, .58) * (speakerZone > .1 ? settle : 1)); }
+    if (keyLight.current) { keyLight.current.intensity = ((35 + range(p, .08, .42) * 155) * (1 - speakerZone * (1 - dip)) + speakerZone * hoverMix.current * 70) * (p > .2 && p < .5 ? stageLights : 1); keyLight.current.position.x = Math.sin(p * Math.PI * 3) * 4 * (1 - speakerZone) + pointer.current.x * speakerZone * 1.2; keyLight.current.angle = .35 - speakerZone * hoverMix.current * .06; keyLight.current.color.lerpColors(new THREE.Color(LIGHT), new THREE.Color("#ffc08a"), range(p, .32, .58) * (speakerZone > .1 ? settle : 1)); }
     if (world.current) { world.current.position.x = THREE.MathUtils.damp(world.current.position.x, pointer.current.x * -.25 * hoverMix.current * speakerZone, 3, delta); world.current.rotation.z += Math.sin(clock.elapsedTime * 2.2) * .004 * hoverMix.current * speakerZone; }
     if (redLight.current) redLight.current.intensity = 20 + Math.sin(p * Math.PI) * 75;
     if (speaker.current) { const reveal = range(p, .32, .44) * (1 - range(p, .56, .7)); speaker.current.position.y = -3 + reveal * 3; speaker.current.scale.setScalar(.95 + Math.sin(clock.elapsedTime * .9) * .008); }
