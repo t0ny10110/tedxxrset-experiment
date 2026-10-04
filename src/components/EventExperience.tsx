@@ -27,6 +27,14 @@ function SpeakerDetail({ speaker, open, onOpenChange }: { speaker: Speaker; open
   );
 }
 
+const SWITCH_MS = 900;
+const EASE = [0.22, 1, 0.36, 1] as const;
+const FADE = { duration: SWITCH_MS / 1000, ease: EASE };
+const smooth = (v: number, a: number, b: number) => { const t = Math.min(1, Math.max(0, (v - a) / (b - a))); return t * t * (3 - 2 * t); };
+function TedxWord({ text }: { text: string }) {
+  return <>{text.split(/(TEDx)/).map((part, i) => part === "TEDx" ? <span key={i} className="tedx-word">TED<span className="tedx-x">x</span></span> : part)}</>;
+}
+
 export function EventExperience() {
   const rootRef = useRef<HTMLElement>(null);
   const targetProgress = useRef(0);
@@ -104,10 +112,14 @@ export function EventExperience() {
   }, []);
 
   if (!speaker) return null;
-  const changeSpeaker = (step: number) => { setDirection(step); speakerSwitch.current = performance.now(); setSpeakerIndex((current) => (current + step + eventConfig.speakers.length) % eventConfig.speakers.length); };
+  const changeSpeaker = (step: number) => { const now = performance.now(); if (now - speakerSwitch.current < SWITCH_MS) return; setDirection(step); speakerSwitch.current = now; setSpeakerIndex((current) => (current + step + eventConfig.speakers.length) % eventConfig.speakers.length); };
   const setHover = (value: boolean) => { speakerHover.current = value; setHovered(value); };
   const px = pointer.current.x; const py = pointer.current.y;
   const sceneProgress = visualProgress * (SCENE_COUNT - 1);
+  const local = sceneProgress - 2;
+  const curtain = smooth(local, -0.75, -0.4);
+  const spot = smooth(local, -0.6, -0.3);
+  const full = smooth(local, -0.35, -0.08);
 
   return (
     <main ref={rootRef} className="cinematic-experience" aria-label={`${eventConfig.brand} interactive experience`}>
@@ -116,7 +128,7 @@ export function EventExperience() {
       <div className="cinematic-vignette" aria-hidden />
 
       <header className="cinematic-header">
-        <button className="brand cinematic-brand" onClick={() => { targetProgress.current = 0; }} aria-label="Return to intro"><strong>TED<sup>x</sup></strong><span>Rajagiri</span></button>
+        <button className="brand cinematic-brand" onClick={() => { targetProgress.current = 0; }} aria-label="Return to intro"><strong>TED<span className="tedx-x">x</span></strong><span>Rajagiri</span></button>
         <span className="host-name">{eventConfig.host}</span>
         <MagneticLink href={eventConfig.ticketUrl} className="header-ticket">Tickets <ArrowUpRight /></MagneticLink>
       </header>
@@ -128,19 +140,22 @@ export function EventExperience() {
           const direction = sceneProgress - index;
           return (
             <section key={scene.index} className={`cinematic-scene scene-${index + 1}${activeScene === index ? " is-active" : ""}`} aria-hidden={activeScene !== index} style={{ opacity, transform: `translate3d(0, ${direction * -48}px, 0) scale(${1 - Math.min(distance, 1) * 0.045})`, filter: `blur(${Math.min(distance * 10, 10)}px)` }}>
-              <div className="scene-copy"><p className="eyebrow">{scene.eyebrow}</p>{index === 0 ? <h1 className="intro-warp-heading"><WarpText text="TEDx x RSET" color="#f8f5ff" warpStrength={0.08} warpScale={1.7} speed={0.55} pointerInfluence={0.42} pointerStrength={0.38} refraction={0.018} ripple fontSize={116} fontWeight={800} style={{ height: "320px" }} fontFamily="inherit" letterSpacing={-0.06} lineHeight={0.9} /></h1> : <h1>{scene.title}</h1>}<p className="scene-description">{scene.text}</p></div>
+              <div className="scene-copy"><p className="eyebrow">{scene.eyebrow}</p>{index === 0 ? <h1 className="intro-title"><TedxWord text="TEDx" /> <span className="intro-x">x</span> RSET</h1> : <h1 className="scene-title"><TedxWord text={scene.title} /></h1>}<p className="scene-description">{scene.text}</p></div>
 
               {index === 2 ? <div className="cinematic-speaker">
-                <div className={`speaker-led${hovered ? " is-hot" : ""}`} aria-hidden style={{ transform: `translate3d(${px * 14}px, ${py * 8}px, 0)` }}><AnimatePresence mode="wait"><motion.div key={speaker.id} initial="hidden" animate="show" exit="out" variants={{ hidden: {}, show: { transition: { delayChildren: 1.05, staggerChildren: 0.18 } }, out: { transition: { staggerChildren: 0.05 } } }}><span className="led-mask"><motion.strong variants={{ hidden: { y: "105%", opacity: 0 }, show: { y: "0%", opacity: 1, transition: { duration: 0.9, ease: [0.2, 0.8, 0.2, 1] } }, out: { y: "-105%", opacity: 0, transition: { duration: 0.4 } } }}>{speaker.talk}</motion.strong></span><span className="led-mask"><motion.em variants={{ hidden: { y: "110%", opacity: 0 }, show: { y: "0%", opacity: 1, transition: { duration: 0.8 } }, out: { opacity: 0, transition: { duration: 0.3 } } }}>{speaker.manifesto}</motion.em></span></motion.div></AnimatePresence></div>
-                <div className="speaker-spot" aria-hidden />
-                <AnimatePresence mode="wait" custom={direction}><motion.button key={speaker.id} custom={direction} className={`cinematic-speaker-portrait${hovered ? " is-hovered" : ""}`} onPointerEnter={() => setHover(true)} onPointerLeave={() => setHover(false)} variants={{ enter: (d: number) => ({ opacity: 0, x: `${d * 60}vw`, filter: "brightness(0) contrast(1.8) blur(3px)" }), center: { opacity: [0, 0.9, 1, 1], x: [`${direction * 60}vw`, "0vw", "0vw", "0vw"], filter: ["brightness(0) contrast(1.8) blur(3px)", "brightness(0) contrast(1.8) blur(0px)", "brightness(0.15) contrast(1.6) blur(0px)", "brightness(1) contrast(1.15) blur(0px)"], transition: { duration: 1.9, times: [0, 0.5, 0.62, 1], ease: [0.22, 0.7, 0.2, 1] } }, exit: (d: number) => ({ opacity: [1, 0.7, 0], x: ["0vw", "0vw", `${d * -8}vw`], scale: [1, 0.98, 0.94], filter: ["brightness(1) blur(0px)", "brightness(0) blur(2px)", "brightness(0) blur(10px)"], transition: { duration: 0.7, times: [0, 0.45, 1] } }) }} initial="enter" animate="center" exit="exit" onClick={() => setSelectedSpeaker(speaker)} aria-label={`Open ${speaker.name} details`}><span className="portrait-parallax" style={{ transform: `translate3d(${px * -18}px, ${py * -12}px, 0) rotateY(${px * 6}deg)` }}><img src={speaker.portrait} alt="" width={896} height={1344} /></span></motion.button></AnimatePresence>
-                <div className="cinematic-speaker-meta"><span>{String(speakerIndex + 1).padStart(2, "0")} / {String(eventConfig.speakers.length).padStart(2, "0")}</span><h2>{speaker.name}</h2><p>{speaker.role}</p>{hovered ? <p className="speaker-hover-talk">{speaker.talk}</p> : null}<button className="speaker-read" onClick={() => setSelectedSpeaker(speaker)}>Enter their idea <ArrowUpRight /></button></div>
+                <div className="stage-led-wrap" style={{ opacity: full }}><div className={`speaker-led${hovered ? " is-hot" : ""}`} aria-hidden style={{ transform: `translate3d(${px * 14}px, ${py * 8}px, 0)` }}><AnimatePresence initial={false}><motion.div key={speaker.id} className="led-inner" initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -24 }} transition={FADE}><strong>{speaker.talk}</strong><em>{speaker.manifesto}</em></motion.div></AnimatePresence></div></div>
+                <div className="speaker-spot" aria-hidden style={{ opacity: 0.15 + spot * 0.45 + full * 0.4 }} />
+                <div className="speaker-portrait-wrap" style={{ opacity: full }}><AnimatePresence initial={false} custom={direction}><motion.button key={speaker.id} custom={direction} className={`cinematic-speaker-portrait${hovered ? " is-hovered" : ""}`} onPointerEnter={() => setHover(true)} onPointerLeave={() => setHover(false)} variants={{ enter: (d: number) => ({ opacity: 0, x: `${d * 14}vw`, filter: "blur(10px)" }), center: { opacity: 1, x: "0vw", filter: "blur(0px)", transition: FADE }, exit: (d: number) => ({ opacity: 0, x: `${d * -14}vw`, filter: "blur(10px)", transition: FADE }) }} initial="enter" animate="center" exit="exit" onClick={() => setSelectedSpeaker(speaker)} aria-label={`Open ${speaker.name} details`}><span className="portrait-parallax" style={{ transform: `translate3d(${px * -18}px, ${py * -12}px, 0) rotateY(${px * 6}deg)` }}><img src={speaker.portrait} alt="" width={896} height={1344} /></span></motion.button></AnimatePresence></div>
+                <div className="stage-curtain left" aria-hidden style={{ transform: `translateX(${-curtain * 100}%)` }} /><div className="stage-curtain right" aria-hidden style={{ transform: `translateX(${curtain * 100}%)` }} />
+                <p className="stage-status" aria-hidden style={{ opacity: 1 - spot }}>Awaiting entrance</p>
+                <div className="stage-audience" aria-hidden style={{ opacity: full * 0.9 }}>{Array.from({ length: 18 }, (_, i) => <i key={i} style={{ height: `${3.2 + ((i * 37) % 7) * 0.25}rem` }} />)}</div>
+                <div className="cinematic-speaker-meta" style={{ opacity: full }}><motion.b key={speaker.id} className="speaker-progress" initial={{ scaleX: 0 }} animate={{ scaleX: 1 }} transition={FADE} /><span>{String(speakerIndex + 1).padStart(2, "0")} / {String(eventConfig.speakers.length).padStart(2, "0")}</span><h2>{speaker.name}</h2><p>{speaker.role}</p>{hovered ? <p className="speaker-hover-talk">{speaker.talk}</p> : null}<button className="speaker-read" onClick={() => setSelectedSpeaker(speaker)}>Enter their idea <ArrowUpRight /></button></div>
                 <div className="cinematic-speaker-controls"><Button variant="outline" size="icon" onClick={() => changeSpeaker(-1)} aria-label="Previous speaker"><ArrowLeft /></Button><Button variant="outline" size="icon" onClick={() => changeSpeaker(1)} aria-label="Next speaker"><ArrowRight /></Button></div>
               </div> : null}
 
               {index === 3 ? <div className="experience-marquee">{eventConfig.experience.map((item) => <div key={item.index}><span>{item.index}</span><strong>{item.name}</strong><p>{item.text}</p></div>)}</div> : null}
               {index === 4 ? <div className="event-facts"><div><CalendarDays /><span>Date</span><strong>{eventConfig.date}</strong></div><div><Clock3 /><span>Time</span><strong>{eventConfig.time}</strong></div><div><MapPin /><span>Venue</span><strong>{eventConfig.venue}</strong><small>{eventConfig.location}</small></div></div> : null}
-              {index === 5 ? <div className="cinematic-cta"><MagneticLink href={eventConfig.ticketUrl} className="ticket-cta"><span>Get your ticket</span><ArrowUpRight /></MagneticLink><a className="instagram-link" href={eventConfig.socials[0]?.href} target="_blank" rel="noreferrer"><Instagram /> @tedxrset</a></div> : null}
+              {index === 5 ? <><div className="cinematic-cta"><MagneticLink href={eventConfig.ticketUrl} className="ticket-cta"><span>Get your ticket</span><ArrowUpRight /></MagneticLink><a className="instagram-link" href={eventConfig.socials[0]?.href} target="_blank" rel="noreferrer"><Instagram /> @tedxrset</a></div><footer className="cinematic-footer"><span><TedxWord text="TEDx" /> Rajagiri</span><a href={`mailto:${eventConfig.contact}`}>{eventConfig.contact}</a><a href={eventConfig.socials[0]?.href} target="_blank" rel="noreferrer">Instagram</a><span>This independent TEDx event is operated under license from TED.</span></footer></> : null}
             </section>
           );
         })}
