@@ -19,6 +19,13 @@ Stage 3  Full Stage   screen on, speaker in focus, audience lit, lights 100%
 
 ## 3. TEDx type and homepage title
 - Switch every text on the site to a TED-style typeface: bold, tight, Helvetica-like. Use Inter Tight for headings and body, with Helvetica Neue as the backup. Large headings use heavy weight with tight letter spacing, like TED's own style.
+- Give the text bold colours. Big headings get a glowing gradient that moves slowly from hot TED red through ember orange to electric magenta. Small labels and numbers get a neon red glow. Speaker talk titles on the stage screen glow in warm amber and red, like real LED light. Each scene gets its own accent colour, so the colours shift as you move through the site:
+  - Intro: red
+  - Idea: magenta
+  - Speakers: amber
+  - Experience: electric blue
+  - Event: violet
+  - Tickets: red
 - Make the "TEDx x RSET" title on the first screen much bigger, about 1.6× its current size, filling most of the screen width. On phones it shrinks to fit without being cut off.
 
 ## 4. Ticket button
