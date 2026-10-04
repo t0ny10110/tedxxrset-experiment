@@ -311,9 +311,9 @@ export function EventExperience() {
                         onPointerEnter={() => setHover(true)}
                         onPointerLeave={() => setHover(false)}
                         variants={{
-                          enter: (d: number) => ({ opacity: 0, x: `${d * 14}vw` }),
-                          center: { opacity: 1, x: "0vw", transition: FADE },
-                          exit: (d: number) => ({ opacity: 0, x: `${d * -14}vw`, transition: FADE })
+                          enter: { opacity: 0, scale: 0.96 },
+                          center: { opacity: 1, scale: 1, transition: FADE },
+                          exit: { opacity: 0, scale: 0.96, transition: FADE }
                         }}
                         initial="enter"
                         animate="center"
@@ -321,7 +321,7 @@ export function EventExperience() {
                         onClick={() => setSelectedSpeaker(speaker)}
                         aria-label={`Open ${speaker.name} details`}
                       >
-                        <span className="portrait-parallax" style={{ transform: `translate3d(${px * -18}px, ${py * -12}px, 0) rotateY(${px * 6}deg)` }}>
+                        <span className="portrait-parallax" style={{ transform: `translate3d(${px * -8}px, ${py * -5}px, 0)` }}>
                           <img src={speaker.portrait} alt={speaker.name} width={896} height={1344} />
                         </span>
                       </motion.button>
