@@ -1,28 +1,39 @@
-# Fixed cinematic timeline
+# Scene 03 polish + site finishing pass
 
-## Experience
-- Replace the document-length journey and all vertically stacked sections with one fixed, full-viewport experience.
-- Organize the story as six reversible timeline states: Intro, The Idea, Speakers, The Experience, Event, and CTA.
-- Keep the WebGL stage continuously mounted so camera, lighting, particles, logo, audience, and speaker staging transform without page cuts.
-- Present each scene’s typography and controls as layered stage graphics, using masked transitions rather than section changes.
+## 1. Speakers
+- Add 5 more speakers (7 total), all as clearly marked placeholders: "Speaker 3"–"Speaker 7", with "coming soon" text.
+- Generate 5 new placeholder speaker cutout photos that match the style of the current two.
+- Replace the walk-in from the side with a simple, smooth crossfade. The old photo fades out and the new one fades in at the same spot. Add a gentle lift and soft blur so it feels cinematic.
+- Smoother switching: one shared easing curve. The screen text, light warm-up and photo fade all play on the same timing. Rapid clicks are ignored until the fade finishes, so nothing stacks or jumps.
+- Add small numbered dots (01–07) under the speaker name so you can jump straight to any speaker.
 
-## Interaction
-- Capture desktop wheel input with a non-passive listener, normalize trackpad deltas, and accumulate them into a clamped 0–1 target.
-- Smooth the displayed timeline toward that target every frame so fast wheel input never causes jumps.
-- Map vertical touch swipes to the same target on mobile, with backward navigation supported.
-- Keep keyboard arrow/Page Up/Page Down navigation available and honor reduced-motion preferences.
-- Add a minimal `01 / 06` indicator and a thin timeline rail with direct scene selection.
+## 2. Three-stage reveal (from your sketch)
+Scrolling into the Speakers scene plays three stages:
 
-## Speaker stage
-- Preserve the step-in choreography inside Scene 03: the outgoing speaker dissolves into shadow, the next enters from the wing, warms into photography, and syncs with backdrop typography.
-- Keep speaker detail access and previous/next speaker controls available only while the Speakers scene is active.
+```text
+Stage 1  Darkness     curtain closed, lights 0%, "Awaiting entrance"
+Stage 2  Red Circle   lone spotlight on the red circle, lights ~40%
+Stage 3  Full Stage   screen on, speaker in focus, audience lit, lights 100%
+```
+- Your scrolling drives each stage, so it plays backwards when you scroll up.
+- Two dark curtain panels part as the stage opens. In stage 3 a dim row of audience shapes lights up at the front edge of the stage.
+
+## 3. TEDx type and homepage title
+- Switch every text on the site to a TED-style typeface: bold, tight, Helvetica-like. Use Inter Tight for headings and body, with Helvetica Neue as the backup. Large headings use heavy weight with tight letter spacing, like TED's own style.
+- Make the "TEDx x RSET" title on the first screen much bigger, about 1.6× its current size, filling most of the screen width. On phones it shrinks to fit without being cut off.
+
+## 4. Ticket button
+- Change the round "Get your ticket" button into a proper rectangle: solid TED red, sharp corners, wide padding, an arrow, and a slight magnetic pull when you move toward it.
+
+## 5. Small finishing details
+- A thin red progress line on the Speakers screen while each photo fades in.
+- Better spacing and alignment on the Experience, Event and closing screens.
+- Footer line on the closing screen: TEDx Rajagiri, contact email, Instagram, and the "independently organized TED event" notice.
+- Fix the page title and description so they no longer say "Ideas in Motion".
+- Check on phone and desktop sizes for anything cut off.
 
 ## Technical details
-- Drive camera position, camera target, field of view, environment groups, lights, audience, speaker silhouette, logo glow, and dust response from the smoothed timeline ref inside the Three.js frame loop.
-- Keep all replaceable event copy and speaker data in the existing event configuration file.
-- Retain the client-only route and performance caps, with a styled non-WebGL fallback.
-- Remove obsolete scrolling layout CSS and lock the document to the viewport.
-
-## Verification
-- Verify wheel, trackpad-style deltas, reverse travel, touch swipes, keyboard controls, speaker switching, and CTA access.
-- Check desktop and phone viewports for clipping or overflow, then confirm clean browser and build diagnostics.
+- New speaker entries and images go in the event content file. The images are placeholders until real photos arrive.
+- The three-stage reveal maps scene-03 progress (about 0.32–0.48) to curtain, spotlight and audience values inside the existing 3D frame loop. The page text follows the same value.
+- Fonts load through the root page head. The font tokens are updated in the global stylesheet.
+- No changes to how scrolling works, the fixed screen, or the 6-scene layout.
