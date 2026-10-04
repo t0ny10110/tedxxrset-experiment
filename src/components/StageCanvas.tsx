@@ -3,7 +3,7 @@ import { Canvas, useFrame } from "@react-three/fiber";
 import { useMemo, useRef } from "react";
 import * as THREE from "three";
 
-type StageCanvasProps = { progress: React.RefObject<number>; pointer: React.RefObject<{ x: number; y: number }>; speakerSwitch?: React.RefObject<number>; speakerHover?: React.RefObject<boolean> };
+type StageCanvasProps = { progress: React.RefObject<number>; pointer: React.RefObject<{ x: number; y: number }>; speakerSwitch?: React.RefObject<number> | undefined; speakerHover?: React.RefObject<boolean> | undefined };
 const RED = "#eb0029";
 const DEEP_RED = "#74111f";
 const INK = "#050505";
