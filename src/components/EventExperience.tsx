@@ -160,7 +160,7 @@ export function EventExperience() {
         })}
       </div>
 
-      <nav className="timeline-nav" aria-label="Cinematic scenes"><span className="scene-counter">{String(activeScene + 1).padStart(2, "0")} <i /> {String(SCENE_COUNT).padStart(2, "0")}</span><div className="timeline-track"><b style={{ transform: `scaleY(${visualProgress})` }} />{eventConfig.scenes.map((scene, index) => <button key={scene.index} className={activeScene === index ? "is-active" : ""} onClick={() => { targetProgress.current = index / (SCENE_COUNT - 1); }} aria-label={`Go to ${scene.label}`}><span>{scene.label}</span></button>)}</div></nav>
+      <nav className="timeline-nav" aria-label="Cinematic scenes"><div className="timeline-track"><b style={{ transform: `scaleY(${visualProgress})` }} />{eventConfig.scenes.map((scene, index) => <button key={scene.index} className={activeScene === index ? "is-active" : ""} onClick={() => { targetProgress.current = index / (SCENE_COUNT - 1); }} aria-label={`Go to ${scene.label}`}><span>{scene.label}</span></button>)}</div></nav>
       {activeScene < 5 ? <div className="input-cue"><span>Scroll or swipe to travel</span><i /></div> : null}
       {selectedSpeaker ? <SpeakerDetail speaker={selectedSpeaker} open onOpenChange={(open) => { if (!open) setSelectedSpeaker(null); }} /> : null}
     </main>
