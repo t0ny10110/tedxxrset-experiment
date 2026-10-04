@@ -304,3 +304,7 @@ body, button, a { font-family: var(--font-sans); }
   .cinematic-footer { left: 1.2rem; right: 3.6rem; bottom: 2.6rem; gap: .3rem 1rem; font-size: .5rem; }
   .ticket-cta { width: auto; padding: 1rem 1.6rem; }
 }
+.scene-copy .intro-title { width: auto; font-size: clamp(3rem, 9.6vw, 11rem); }
+.stage-audience { bottom: -.6rem; opacity: .9; }
+.stage-audience i { width: 3rem; height: 2.2rem !important; background: radial-gradient(circle at 50% 30%, #0b0b0b 40%, #000 70%); border-radius: 50% 50% 0 0; }
+@media (max-width: 800px) { .scene-copy .intro-title { font-size: 13vw; } .stage-audience i { width: 1.6rem; height: 1.4rem !important; } }
