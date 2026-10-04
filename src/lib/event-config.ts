@@ -46,7 +46,7 @@ export const eventConfig = {
     },
   ] satisfies Speaker[],
   scenes: [
-    { index: "01", label: "Intro", eyebrow: "TEDx Rajagiri", title: "Ideas in motion", text: "A stage waits in the dark. Move forward to ignite it." },
+    { index: "01", label: "Intro", eyebrow: "TEDx Rajagiri", title: "TEDx x RSET", text: "A stage waits in the dark. Move forward to ignite it." },
     { index: "02", label: "The idea", eyebrow: "Worth spreading", title: "One thought changes everything", text: "Progress begins when a familiar world is seen from an unfamiliar angle." },
     { index: "03", label: "Speakers", eyebrow: "Voices on the red circle", title: "Step into the light", text: "Two voices. Two perspectives. One room ready to listen." },
     { index: "04", label: "The experience", eyebrow: "Inside the day", title: "More than a conference", text: "Talks, performance, encounters and community move in one shared rhythm." },

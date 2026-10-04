@@ -5,3 +5,4 @@
 - [x] Drive WebGL camera, lighting, particles, and stage objects from the smoothed timeline.
 - [x] Preserve speaker step-in choreography and event interactions inside the scene system.
 - [x] Verify desktop/mobile rendering, interaction, and browser errors.
+- [x] Change the opening title to TEDx x RSET and apply the interactive OGL warp effect.
