@@ -88,15 +88,17 @@ export function EventExperience() {
       const nextY = event.touches[0]?.clientY;
       if (touchY.current === null || nextY === undefined) return;
       event.preventDefault();
-      advance((touchY.current - nextY) * 0.0016);
+      const delta = touchY.current - nextY;
+      if (scrollSpeaker(delta > 0 ? 1 : -1)) { touchY.current = nextY; return; }
+      advance(delta * 0.0016);
       touchY.current = nextY;
     };
     const onTouchEnd = () => { touchY.current = null; };
     const onPointer = (event: PointerEvent) => { pointer.current = { x: event.clientX / window.innerWidth - 0.5, y: event.clientY / window.innerHeight - 0.5 }; };
     const onKey = (event: KeyboardEvent) => {
       if (["ArrowDown", "PageDown", "Space", "ArrowUp", "PageUp", "Home", "End"].includes(event.code)) event.preventDefault();
-      if (["ArrowDown", "PageDown", "Space"].includes(event.code)) advance(1 / (SCENE_COUNT - 1));
-      if (["ArrowUp", "PageUp"].includes(event.code)) advance(-1 / (SCENE_COUNT - 1));
+      if (["ArrowDown", "PageDown", "Space"].includes(event.code) && !scrollSpeaker(1)) advance(1 / (SCENE_COUNT - 1));
+      if (["ArrowUp", "PageUp"].includes(event.code) && !scrollSpeaker(-1)) advance(-1 / (SCENE_COUNT - 1));
       if (event.code === "Home") targetProgress.current = 0;
       if (event.code === "End") targetProgress.current = 1;
     };
