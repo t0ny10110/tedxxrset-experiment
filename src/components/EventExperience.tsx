@@ -35,6 +35,10 @@ export function EventExperience() {
   const touchY = useRef<number | null>(null);
   const [visualProgress, setVisualProgress] = useState(0);
   const [speakerIndex, setSpeakerIndex] = useState(0);
+  const [direction, setDirection] = useState(1);
+  const [hovered, setHovered] = useState(false);
+  const speakerSwitch = useRef(-10000);
+  const speakerHover = useRef(false);
   const [selectedSpeaker, setSelectedSpeaker] = useState<Speaker | null>(null);
   const activeScene = Math.min(SCENE_COUNT - 1, Math.round(visualProgress * (SCENE_COUNT - 1)));
   const speaker = eventConfig.speakers[speakerIndex];
@@ -100,13 +104,15 @@ export function EventExperience() {
   }, []);
 
   if (!speaker) return null;
-  const changeSpeaker = (direction: number) => setSpeakerIndex((current) => (current + direction + eventConfig.speakers.length) % eventConfig.speakers.length);
+  const changeSpeaker = (step: number) => { setDirection(step); speakerSwitch.current = performance.now(); setSpeakerIndex((current) => (current + step + eventConfig.speakers.length) % eventConfig.speakers.length); };
+  const setHover = (value: boolean) => { speakerHover.current = value; setHovered(value); };
+  const px = pointer.current.x; const py = pointer.current.y;
   const sceneProgress = visualProgress * (SCENE_COUNT - 1);
 
   return (
     <main ref={rootRef} className="cinematic-experience" aria-label={`${eventConfig.brand} interactive experience`}>
       <CustomCursor />
-      <div className="cinematic-canvas" aria-hidden><Suspense fallback={<div className="stage-fallback" />}><StageCanvas progress={progress} pointer={pointer} /></Suspense></div>
+      <div className="cinematic-canvas" aria-hidden><Suspense fallback={<div className="stage-fallback" />}><StageCanvas progress={progress} pointer={pointer} speakerSwitch={speakerSwitch} speakerHover={speakerHover} /></Suspense></div>
       <div className="cinematic-vignette" aria-hidden />
 
       <header className="cinematic-header">
@@ -125,9 +131,10 @@ export function EventExperience() {
               <div className="scene-copy"><p className="eyebrow">{scene.eyebrow}</p>{index === 0 ? <h1 className="intro-warp-heading"><WarpText text="TEDx x RSET" color="#f8f5ff" warpStrength={0.08} warpScale={1.7} speed={0.55} pointerInfluence={0.42} pointerStrength={0.38} refraction={0.018} ripple fontSize={116} fontWeight={800} style={{ height: "320px" }} fontFamily="inherit" letterSpacing={-0.06} lineHeight={0.9} /></h1> : <h1>{scene.title}</h1>}<p className="scene-description">{scene.text}</p></div>
 
               {index === 2 ? <div className="cinematic-speaker">
-                <div className="speaker-led" aria-hidden><AnimatePresence mode="wait"><motion.div key={speaker.id} initial={{ opacity: 0, clipPath: "inset(0 0 100% 0)" }} animate={{ opacity: 1, clipPath: "inset(0 0 0% 0)" }} exit={{ opacity: 0, clipPath: "inset(100% 0 0 0)" }} transition={{ duration: 0.8 }}><strong>{speaker.talk}</strong><span>{speaker.manifesto}</span></motion.div></AnimatePresence></div>
-                <AnimatePresence mode="wait"><motion.button key={speaker.id} className="cinematic-speaker-portrait" initial={{ opacity: 0, x: 240, filter: "brightness(0) blur(4px)" }} animate={{ opacity: [0, 1, 1], x: [240, 0, 0], filter: ["brightness(0) blur(4px)", "brightness(0) blur(0px)", "brightness(1) blur(0px)"] }} exit={{ opacity: [1, 0.8, 0], x: [0, -20, -220], filter: ["brightness(1) blur(0px)", "brightness(0) blur(0px)", "brightness(0) blur(5px)"] }} transition={{ duration: 1.1, times: [0, 0.58, 1] }} onClick={() => setSelectedSpeaker(speaker)} aria-label={`Open ${speaker.name} details`}><img src={speaker.portrait} alt="" width={896} height={1344} /></motion.button></AnimatePresence>
-                <div className="cinematic-speaker-meta"><span>{String(speakerIndex + 1).padStart(2, "0")} / {String(eventConfig.speakers.length).padStart(2, "0")}</span><h2>{speaker.name}</h2><p>{speaker.role}</p><button className="speaker-read" onClick={() => setSelectedSpeaker(speaker)}>Enter their idea <ArrowUpRight /></button></div>
+                <div className={`speaker-led${hovered ? " is-hot" : ""}`} aria-hidden style={{ transform: `translate3d(${px * 14}px, ${py * 8}px, 0)` }}><AnimatePresence mode="wait"><motion.div key={speaker.id} initial="hidden" animate="show" exit="out" variants={{ hidden: {}, show: { transition: { delayChildren: 1.05, staggerChildren: 0.18 } }, out: { transition: { staggerChildren: 0.05 } } }}><span className="led-mask"><motion.strong variants={{ hidden: { y: "105%", opacity: 0 }, show: { y: "0%", opacity: 1, transition: { duration: 0.9, ease: [0.2, 0.8, 0.2, 1] } }, out: { y: "-105%", opacity: 0, transition: { duration: 0.4 } } }}>{speaker.talk}</motion.strong></span><span className="led-mask"><motion.em variants={{ hidden: { y: "110%", opacity: 0 }, show: { y: "0%", opacity: 1, transition: { duration: 0.8 } }, out: { opacity: 0, transition: { duration: 0.3 } } }}>{speaker.manifesto}</motion.em></span></motion.div></AnimatePresence></div>
+                <div className="speaker-spot" aria-hidden />
+                <AnimatePresence mode="wait" custom={direction}><motion.button key={speaker.id} custom={direction} className={`cinematic-speaker-portrait${hovered ? " is-hovered" : ""}`} onPointerEnter={() => setHover(true)} onPointerLeave={() => setHover(false)} variants={{ enter: (d: number) => ({ opacity: 0, x: `${d * 60}vw`, filter: "brightness(0) contrast(1.8) blur(3px)" }), center: { opacity: [0, 0.9, 1, 1], x: ["var(--from)", "0vw", "0vw", "0vw"].map((v, i) => (i === 0 ? `${direction * 60}vw` : v)), filter: ["brightness(0) contrast(1.8) blur(3px)", "brightness(0) contrast(1.8) blur(0px)", "brightness(0.15) contrast(1.6) blur(0px)", "brightness(1) contrast(1.15) blur(0px)"], transition: { duration: 1.9, times: [0, 0.5, 0.62, 1], ease: [0.22, 0.7, 0.2, 1] } }, exit: (d: number) => ({ opacity: [1, 0.7, 0], x: ["0vw", "0vw", `${d * -8}vw`], scale: [1, 0.98, 0.94], filter: ["brightness(1) blur(0px)", "brightness(0) blur(2px)", "brightness(0) blur(10px)"], transition: { duration: 0.7, times: [0, 0.45, 1] } }) }} initial="enter" animate="center" exit="exit" onClick={() => setSelectedSpeaker(speaker)} aria-label={`Open ${speaker.name} details`}><span className="portrait-parallax" style={{ transform: `translate3d(${px * -18}px, ${py * -12}px, 0) rotateY(${px * 6}deg)` }}><img src={speaker.portrait} alt="" width={896} height={1344} /></span></motion.button></AnimatePresence>
+                <div className="cinematic-speaker-meta"><span>{String(speakerIndex + 1).padStart(2, "0")} / {String(eventConfig.speakers.length).padStart(2, "0")}</span><h2>{speaker.name}</h2><p>{speaker.role}</p>{hovered ? <p className="speaker-hover-talk">{speaker.talk}</p> : null}<button className="speaker-read" onClick={() => setSelectedSpeaker(speaker)}>Enter their idea <ArrowUpRight /></button></div>
                 <div className="cinematic-speaker-controls"><Button variant="outline" size="icon" onClick={() => changeSpeaker(-1)} aria-label="Previous speaker"><ArrowLeft /></Button><Button variant="outline" size="icon" onClick={() => changeSpeaker(1)} aria-label="Next speaker"><ArrowRight /></Button></div>
               </div> : null}
 
