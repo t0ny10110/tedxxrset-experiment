@@ -14,22 +14,78 @@ function clamp(value: number) {
   return Math.max(0, Math.min(1, value));
 }
 
+function LoadingOverlay({ progress, isDone }: { progress: number; isDone: boolean }) {
+  const getStatusText = (p: number) => {
+    if (p < 30) return "Initializing 3D Stage...";
+    if (p < 70) return "Preloading Speaker Assets...";
+    if (p < 99) return "Preparing Cinematic Experience...";
+    return "Ready to Enter";
+  };
+
+  return (
+    <AnimatePresence>
+      {!isDone && (
+        <motion.div
+          className="loading-overlay"
+          initial={{ opacity: 1 }}
+          exit={{ opacity: 0, transition: { duration: 0.7, ease: [0.22, 1, 0.36, 1] } }}
+        >
+          <div className="loading-content">
+            <div className="loading-brand">
+              <strong className="brand-ted">TED<span className="brand-x">x</span></strong>
+              <span className="brand-name">Rajagiri</span>
+            </div>
+            <p className="loading-tagline">IDEAS IN MOTION · 16 JANUARY 2027</p>
+
+            <div className="loading-progress-container">
+              <div className="loading-progress-bar" style={{ width: `${progress}%` }} />
+            </div>
+
+            <div className="loading-meta">
+              <span className="loading-status">{getStatusText(progress)}</span>
+              <span className="loading-percentage">{progress}%</span>
+            </div>
+          </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+}
+
 function SpeakerDetail({ speaker, open, onOpenChange }: { speaker: Speaker; open: boolean; onOpenChange: (open: boolean) => void }) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="speaker-dialog max-w-none border-0 p-0" onOpenAutoFocus={(event) => event.preventDefault()}>
-        <Button variant="ghost" size="icon" className="speaker-dialog-close" onClick={() => onOpenChange(false)} aria-label="Close speaker details"><X /></Button>
-        <div className="speaker-dialog-portrait"><img src={speaker.portrait} alt={speaker.name} width={896} height={1344} /></div>
-        <div className="speaker-dialog-copy"><p className="eyebrow">Featured speaker</p><DialogTitle>{speaker.name}</DialogTitle><DialogDescription>{speaker.role}</DialogDescription><blockquote>“{speaker.manifesto}”</blockquote><p>{speaker.bio}</p><div className="speaker-dialog-talk"><span>Talk</span><strong>{speaker.talk}</strong></div></div>
+        <button className="speaker-dialog-close" onClick={() => onOpenChange(false)} aria-label="Close speaker details">
+          <X className="w-5 h-5" />
+        </button>
+        <div className="speaker-dialog-portrait">
+          <img src={speaker.portrait} alt={speaker.name} width={896} height={1344} />
+        </div>
+        <div className="speaker-dialog-copy">
+          <p className="eyebrow">Featured speaker</p>
+          <DialogTitle className="speaker-modal-title">{speaker.name}</DialogTitle>
+          <DialogDescription className="speaker-modal-role">{speaker.role}</DialogDescription>
+          <blockquote>“{speaker.manifesto}”</blockquote>
+          <p className="speaker-modal-bio">{speaker.bio}</p>
+          <div className="speaker-dialog-talk">
+            <span>Talk Title</span>
+            <strong>{speaker.talk}</strong>
+          </div>
+        </div>
       </DialogContent>
     </Dialog>
   );
 }
 
-const SWITCH_MS = 900;
+const SWITCH_MS = 380;
 const EASE = [0.22, 1, 0.36, 1] as const;
 const FADE = { duration: SWITCH_MS / 1000, ease: EASE };
-const smooth = (v: number, a: number, b: number) => { const t = Math.min(1, Math.max(0, (v - a) / (b - a))); return t * t * (3 - 2 * t); };
+const smooth = (v: number, a: number, b: number) => {
+  const t = Math.min(1, Math.max(0, (v - a) / (b - a)));
+  return t * t * (3 - 2 * t);
+};
+
 function TedxWord({ text }: { text: string }) {
   return <>{text.split(/(TEDx)/).map((part, i) => part === "TEDx" ? <span key={i} className="tedx-word">TED<span className="tedx-x">x</span></span> : part)}</>;
 }
@@ -47,12 +103,53 @@ export function EventExperience() {
   const speakerSwitch = useRef(-10000);
   const speakerHover = useRef(false);
   const [selectedSpeaker, setSelectedSpeaker] = useState<Speaker | null>(null);
+
+  const [loadProgress, setLoadProgress] = useState(0);
+  const [isLoaded, setIsLoaded] = useState(false);
+
   const activeScene = Math.min(SCENE_COUNT - 1, Math.round(visualProgress * (SCENE_COUNT - 1)));
   const speaker = eventConfig.speakers[speakerIndex];
   const sceneRef = useRef(0);
   const speakerRef = useRef(0);
   sceneRef.current = activeScene;
   speakerRef.current = speakerIndex;
+
+  // Preload speaker portraits for instant rendering and display loading screen
+  useEffect(() => {
+    const imagesToPreload = eventConfig.speakers.map((s) => s.portrait);
+    let loadedCount = 0;
+    const totalImages = imagesToPreload.length;
+
+    if (totalImages === 0) {
+      setLoadProgress(100);
+      setIsLoaded(true);
+      return;
+    }
+
+    const startTime = performance.now();
+    const MIN_LOADING_TIME = 1000;
+
+    imagesToPreload.forEach((src) => {
+      const img = new Image();
+      const onComplete = () => {
+        loadedCount += 1;
+        const rawProgress = Math.round((loadedCount / totalImages) * 100);
+        setLoadProgress(rawProgress);
+
+        if (loadedCount === totalImages) {
+          const elapsed = performance.now() - startTime;
+          const remaining = Math.max(0, MIN_LOADING_TIME - elapsed);
+          setTimeout(() => {
+            setLoadProgress(100);
+            setTimeout(() => setIsLoaded(true), 300);
+          }, remaining);
+        }
+      };
+      img.onload = onComplete;
+      img.onerror = onComplete;
+      img.src = src;
+    });
+  }, []);
 
   useEffect(() => {
     const root = rootRef.current;
@@ -74,15 +171,18 @@ export function EventExperience() {
       setSpeakerIndex(next);
       return true;
     };
+
     const advance = (delta: number) => {
       targetProgress.current = clamp(targetProgress.current + delta);
     };
+
     const onWheel = (event: WheelEvent) => {
       event.preventDefault();
       const normalized = event.deltaY * (event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? 100 : 1);
       if (scrollSpeaker(normalized > 0 ? 1 : -1)) return;
       advance(normalized * 0.00042);
     };
+
     const onTouchStart = (event: TouchEvent) => { touchY.current = event.touches[0]?.clientY ?? null; };
     const onTouchMove = (event: TouchEvent) => {
       const nextY = event.touches[0]?.clientY;
@@ -102,6 +202,7 @@ export function EventExperience() {
       if (event.code === "Home") targetProgress.current = 0;
       if (event.code === "End") targetProgress.current = 1;
     };
+
     const tick = (now: number) => {
       const delta = Math.min((now - last) / 1000, 0.05);
       last = now;
@@ -131,23 +232,46 @@ export function EventExperience() {
   }, []);
 
   if (!speaker) return null;
-  const changeSpeaker = (step: number) => { const now = performance.now(); if (now - speakerSwitch.current < SWITCH_MS) return; setDirection(step); speakerSwitch.current = now; setSpeakerIndex((current) => (current + step + eventConfig.speakers.length) % eventConfig.speakers.length); };
-  const setHover = (value: boolean) => { speakerHover.current = value; setHovered(value); };
-  const px = pointer.current.x; const py = pointer.current.y;
+
+  const changeSpeaker = (step: number) => {
+    const now = performance.now();
+    if (now - speakerSwitch.current < SWITCH_MS) return;
+    setDirection(step);
+    speakerSwitch.current = now;
+    setSpeakerIndex((current) => (current + step + eventConfig.speakers.length) % eventConfig.speakers.length);
+  };
+
+  const setHover = (value: boolean) => {
+    speakerHover.current = value;
+    setHovered(value);
+  };
+
+  const px = pointer.current.x;
+  const py = pointer.current.y;
   const sceneProgress = visualProgress * (SCENE_COUNT - 1);
   const local = sceneProgress - 2;
-  const curtain = smooth(local, -0.75, -0.4);
-  const spot = smooth(local, -0.6, -0.3);
-  const full = smooth(local, -0.35, -0.08);
+
+  // Symmetrical fade curves so speakers section is always bright & loaded while active
+  const curtain = smooth(1 - Math.abs(local), 0.05, 0.5);
+  const spot = smooth(1 - Math.abs(local), 0.15, 0.6);
+  const full = smooth(1 - Math.abs(local), 0.2, 0.65);
 
   return (
     <main ref={rootRef} className="cinematic-experience" aria-label={`${eventConfig.brand} interactive experience`}>
+      <LoadingOverlay progress={loadProgress} isDone={isLoaded} />
       <CustomCursor />
-      <div className="cinematic-canvas" aria-hidden><Suspense fallback={<div className="stage-fallback" />}><StageCanvas progress={progress} pointer={pointer} speakerSwitch={speakerSwitch} speakerHover={speakerHover} /></Suspense></div>
+      <div className="cinematic-canvas" aria-hidden>
+        <Suspense fallback={<div className="stage-fallback" />}>
+          <StageCanvas progress={progress} pointer={pointer} speakerSwitch={speakerSwitch} speakerHover={speakerHover} />
+        </Suspense>
+      </div>
       <div className="cinematic-vignette" aria-hidden />
 
       <header className="cinematic-header">
-        <button className="brand cinematic-brand" onClick={() => { targetProgress.current = 0; }} aria-label="Return to intro"><strong>TED<span className="tedx-x">x</span></strong><span>Rajagiri</span></button>
+        <button className="brand cinematic-brand" onClick={() => { targetProgress.current = 0; }} aria-label="Return to intro">
+          <strong>TED<span className="tedx-x">x</span></strong>
+          <span>Rajagiri</span>
+        </button>
         <span className="host-name">{eventConfig.host}</span>
         <MagneticLink href={eventConfig.ticketUrl} className="header-ticket">Tickets <ArrowUpRight /></MagneticLink>
       </header>
@@ -158,31 +282,154 @@ export function EventExperience() {
           const opacity = Math.max(0, 1 - distance * 1.7);
           const direction = sceneProgress - index;
           return (
-            <section key={scene.index} className={`cinematic-scene scene-${index + 1}${activeScene === index ? " is-active" : ""}`} aria-hidden={activeScene !== index} style={{ opacity, transform: `translate3d(0, ${direction * -48}px, 0) scale(${1 - Math.min(distance, 1) * 0.045})`, filter: `blur(${Math.min(distance * 10, 10)}px)` }}>
-              <div className="scene-copy"><p className="eyebrow">{scene.eyebrow}</p>{index === 0 ? <h1 className="intro-title"><TedxWord text="TEDx" /> <span className="intro-x">x</span> RSET</h1> : <h1 className="scene-title"><TedxWord text={scene.title} /></h1>}<p className="scene-description">{scene.text}</p></div>
+            <section
+              key={scene.index}
+              className={`cinematic-scene scene-${index + 1}${activeScene === index ? " is-active" : ""}`}
+              aria-hidden={activeScene !== index}
+              style={{
+                opacity,
+                transform: `translate3d(0, ${direction * -48}px, 0) scale(${1 - Math.min(distance, 1) * 0.045})`,
+                filter: `blur(${Math.min(distance * 10, 10)}px)`
+              }}
+            >
+              <div className="scene-copy">
+                <p className="eyebrow">{scene.eyebrow}</p>
+                {index === 0 ? <h1 className="intro-title"><TedxWord text="TEDx" /> <span className="intro-x">x</span> RSET</h1> : <h1 className="scene-title"><TedxWord text={scene.title} /></h1>}
+                <p className="scene-description">{scene.text}</p>
+              </div>
 
-              {index === 2 ? <div className="cinematic-speaker">
-                <div className="stage-led-wrap" style={{ opacity: full }}><div className={`speaker-led${hovered ? " is-hot" : ""}`} aria-hidden style={{ transform: `translate3d(${px * 14}px, ${py * 8}px, 0)` }}><AnimatePresence initial={false}><motion.div key={speaker.id} className="led-inner" initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -24 }} transition={FADE}><strong>{speaker.talk}</strong><em>{speaker.manifesto}</em></motion.div></AnimatePresence></div></div>
-                <div className="speaker-spot" aria-hidden style={{ opacity: 0.15 + spot * 0.45 + full * 0.4 }} />
-                <div className="speaker-portrait-wrap" style={{ opacity: full }}><AnimatePresence initial={false} custom={direction}><motion.button key={speaker.id} custom={direction} className={`cinematic-speaker-portrait${hovered ? " is-hovered" : ""}`} onPointerEnter={() => setHover(true)} onPointerLeave={() => setHover(false)} variants={{ enter: (d: number) => ({ opacity: 0, x: `${d * 14}vw`, filter: "blur(10px)" }), center: { opacity: 1, x: "0vw", filter: "blur(0px)", transition: FADE }, exit: (d: number) => ({ opacity: 0, x: `${d * -14}vw`, filter: "blur(10px)", transition: FADE }) }} initial="enter" animate="center" exit="exit" onClick={() => setSelectedSpeaker(speaker)} aria-label={`Open ${speaker.name} details`}><span className="portrait-parallax" style={{ transform: `translate3d(${px * -18}px, ${py * -12}px, 0) rotateY(${px * 6}deg)` }}><img src={speaker.portrait} alt="" width={896} height={1344} /></span></motion.button></AnimatePresence></div>
-                <div className="stage-curtain left" aria-hidden style={{ transform: `translateX(${-curtain * 100}%)` }} /><div className="stage-curtain right" aria-hidden style={{ transform: `translateX(${curtain * 100}%)` }} />
-                <p className="stage-status" aria-hidden style={{ opacity: 1 - spot }}>Awaiting entrance</p>
-                <div className="stage-audience" aria-hidden style={{ opacity: full * 0.9 }}>{Array.from({ length: 18 }, (_, i) => <i key={i} style={{ height: `${3.2 + ((i * 37) % 7) * 0.25}rem` }} />)}</div>
-                <div className="cinematic-speaker-meta" style={{ opacity: full }}><motion.b key={speaker.id} className="speaker-progress" initial={{ scaleX: 0 }} animate={{ scaleX: 1 }} transition={FADE} /><span>{String(speakerIndex + 1).padStart(2, "0")} / {String(eventConfig.speakers.length).padStart(2, "0")}</span><h2>{speaker.name}</h2><p>{speaker.role}</p>{hovered ? <p className="speaker-hover-talk">{speaker.talk}</p> : null}<button className="speaker-read" onClick={() => setSelectedSpeaker(speaker)}>Enter their idea <ArrowUpRight /></button></div>
-                <div className="cinematic-speaker-controls"><Button variant="outline" size="icon" onClick={() => changeSpeaker(-1)} aria-label="Previous speaker"><ArrowLeft /></Button><Button variant="outline" size="icon" onClick={() => changeSpeaker(1)} aria-label="Next speaker"><ArrowRight /></Button></div>
-              </div> : null}
+              {index === 2 ? (
+                <div className="cinematic-speaker">
+                  <div className="stage-led-wrap" style={{ opacity: full }}>
+                    <div className={`speaker-led${hovered ? " is-hot" : ""}`} aria-hidden style={{ transform: `translate3d(${px * 14}px, ${py * 8}px, 0)` }}>
+                      <AnimatePresence initial={false}>
+                        <motion.div key={speaker.id} className="led-inner" initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -24 }} transition={FADE}>
+                          <strong>{speaker.talk}</strong>
+                          <em>{speaker.manifesto}</em>
+                        </motion.div>
+                      </AnimatePresence>
+                    </div>
+                  </div>
+                  <div className="speaker-spot" aria-hidden style={{ opacity: 0.15 + spot * 0.45 + full * 0.4 }} />
+                  <div className="speaker-portrait-wrap" style={{ opacity: full }}>
+                    <AnimatePresence initial={false} custom={direction}>
+                      <motion.button
+                        key={speaker.id}
+                        custom={direction}
+                        className={`cinematic-speaker-portrait${hovered ? " is-hovered" : ""}`}
+                        onPointerEnter={() => setHover(true)}
+                        onPointerLeave={() => setHover(false)}
+                        variants={{
+                          enter: (d: number) => ({ opacity: 0, x: `${d * 14}vw`, filter: "blur(10px)" }),
+                          center: { opacity: 1, x: "0vw", filter: "blur(0px)", transition: FADE },
+                          exit: (d: number) => ({ opacity: 0, x: `${d * -14}vw`, filter: "blur(10px)", transition: FADE })
+                        }}
+                        initial="enter"
+                        animate="center"
+                        exit="exit"
+                        onClick={() => setSelectedSpeaker(speaker)}
+                        aria-label={`Open ${speaker.name} details`}
+                      >
+                        <span className="portrait-parallax" style={{ transform: `translate3d(${px * -18}px, ${py * -12}px, 0) rotateY(${px * 6}deg)` }}>
+                          <img src={speaker.portrait} alt={speaker.name} width={896} height={1344} />
+                        </span>
+                      </motion.button>
+                    </AnimatePresence>
+                  </div>
+                  <div className="stage-curtain left" aria-hidden style={{ transform: `translateX(${-curtain * 100}%)` }} />
+                  <div className="stage-curtain right" aria-hidden style={{ transform: `translateX(${curtain * 100}%)` }} />
+                  <p className="stage-status" aria-hidden style={{ opacity: 1 - spot }}>Awaiting entrance</p>
+                  <div className="stage-audience" aria-hidden style={{ opacity: full * 0.9 }}>
+                    {Array.from({ length: 18 }, (_, i) => <i key={i} style={{ height: `${3.2 + ((i * 37) % 7) * 0.25}rem` }} />)}
+                  </div>
+                  <div className="cinematic-speaker-meta" style={{ opacity: full }}>
+                    <motion.b key={speaker.id} className="speaker-progress" initial={{ scaleX: 0 }} animate={{ scaleX: 1 }} transition={FADE} />
+                    <span>{String(speakerIndex + 1).padStart(2, "0")} / {String(eventConfig.speakers.length).padStart(2, "0")}</span>
+                    <h2>{speaker.name}</h2>
+                    <p>{speaker.role}</p>
+                    {hovered ? <p className="speaker-hover-talk">{speaker.talk}</p> : null}
+                    <button className="speaker-read" onClick={() => setSelectedSpeaker(speaker)}>Enter their idea <ArrowUpRight /></button>
+                  </div>
+                  <div className="cinematic-speaker-controls">
+                    <div className="speaker-nav-buttons">
+                      <Button variant="outline" size="icon" onClick={() => changeSpeaker(-1)} aria-label="Previous speaker"><ArrowLeft /></Button>
+                      <Button variant="outline" size="icon" onClick={() => changeSpeaker(1)} aria-label="Next speaker"><ArrowRight /></Button>
+                    </div>
+                    <div className="speaker-dots">
+                      {eventConfig.speakers.map((sp, idx) => (
+                        <button
+                          key={sp.id}
+                          className={`speaker-dot-item ${idx === speakerIndex ? "is-active" : ""}`}
+                          onClick={() => {
+                            setDirection(idx > speakerIndex ? 1 : -1);
+                            speakerSwitch.current = performance.now();
+                            setSpeakerIndex(idx);
+                          }}
+                          aria-label={`Go to ${sp.name}`}
+                        >
+                          <span />
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              ) : null}
 
-              {index === 3 ? <div className="experience-marquee">{eventConfig.experience.map((item) => <div key={item.index}><span>{item.index}</span><strong>{item.name}</strong><p>{item.text}</p></div>)}</div> : null}
-              {index === 4 ? <div className="event-facts"><div><CalendarDays /><span>Date</span><strong>{eventConfig.date}</strong></div><div><Clock3 /><span>Time</span><strong>{eventConfig.time}</strong></div><div><MapPin /><span>Venue</span><strong>{eventConfig.venue}</strong><small>{eventConfig.location}</small></div></div> : null}
-              {index === 5 ? <><div className="cinematic-cta"><MagneticLink href={eventConfig.ticketUrl} className="ticket-cta"><span>Get your ticket</span><ArrowUpRight /></MagneticLink><a className="instagram-link" href={eventConfig.socials[0]?.href} target="_blank" rel="noreferrer"><Instagram /> @tedxrset</a></div><footer className="cinematic-footer"><span><TedxWord text="TEDx" /> Rajagiri</span><a href={`mailto:${eventConfig.contact}`}>{eventConfig.contact}</a><a href={eventConfig.socials[0]?.href} target="_blank" rel="noreferrer">Instagram</a><span>This independent TEDx event is operated under license from TED.</span></footer></> : null}
+              {index === 3 ? (
+                <div className="experience-marquee">
+                  {eventConfig.experience.map((item) => (
+                    <div key={item.index} className="experience-item">
+                      <span>{item.index}</span>
+                      <strong>{item.name}</strong>
+                      <p>{item.text}</p>
+                    </div>
+                  ))}
+                </div>
+              ) : null}
+
+              {index === 4 ? (
+                <div className="event-facts">
+                  <div><CalendarDays /><span>Date</span><strong>{eventConfig.date}</strong></div>
+                  <div><Clock3 /><span>Time</span><strong>{eventConfig.time}</strong></div>
+                  <div><MapPin /><span>Venue</span><strong>{eventConfig.venue}</strong><small>{eventConfig.location}</small></div>
+                </div>
+              ) : null}
+
+              {index === 5 ? (
+                <>
+                  <div className="cinematic-cta">
+                    <MagneticLink href={eventConfig.ticketUrl} className="ticket-cta">
+                      <span>Get your ticket</span><ArrowUpRight />
+                    </MagneticLink>
+                    <a className="instagram-link" href={eventConfig.socials[0]?.href} target="_blank" rel="noreferrer">
+                      <Instagram /> @tedxrset
+                    </a>
+                  </div>
+                  <footer className="cinematic-footer">
+                    <span><TedxWord text="TEDx" /> Rajagiri</span>
+                    <a href={`mailto:${eventConfig.contact}`}>{eventConfig.contact}</a>
+                    <a href={eventConfig.socials[0]?.href} target="_blank" rel="noreferrer">Instagram</a>
+                    <span>This independent TEDx event is operated under license from TED.</span>
+                  </footer>
+                </>
+              ) : null}
             </section>
           );
         })}
       </div>
 
-      <nav className="timeline-nav" aria-label="Cinematic scenes"><div className="timeline-track"><b style={{ transform: `scaleY(${visualProgress})` }} />{eventConfig.scenes.map((scene, index) => <button key={scene.index} className={activeScene === index ? "is-active" : ""} onClick={() => { targetProgress.current = index / (SCENE_COUNT - 1); }} aria-label={`Go to ${scene.label}`}><span>{scene.label}</span></button>)}</div></nav>
+      <nav className="timeline-nav" aria-label="Cinematic scenes">
+        <div className="timeline-track">
+          <b style={{ transform: `scaleY(${visualProgress})` }} />
+          {eventConfig.scenes.map((scene, index) => (
+            <button key={scene.index} className={activeScene === index ? "is-active" : ""} onClick={() => { targetProgress.current = index / (SCENE_COUNT - 1); }} aria-label={`Go to ${scene.label}`}>
+              <span>{scene.label}</span>
+            </button>
+          ))}
+        </div>
+      </nav>
       {activeScene < 5 ? <div className="input-cue"><span>Scroll or swipe to travel</span><i /></div> : null}
       {selectedSpeaker ? <SpeakerDetail speaker={selectedSpeaker} open onOpenChange={(open) => { if (!open) setSelectedSpeaker(null); }} /> : null}
     </main>
   );
-}
+}
