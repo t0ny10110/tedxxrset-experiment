@@ -51,3 +51,12 @@ Stage 3  Full Stage   screen on, speaker in focus, audience lit, lights 100%
 - The three-stage reveal maps scene-03 progress (about 0.32–0.48) to curtain, spotlight and audience values inside the existing 3D frame loop. The page text follows the same value.
 - Fonts load through the root page head. The font tokens are updated in the global stylesheet.
 - No changes to how scrolling works, the fixed screen, or the 6-scene layout.
+
+## 6. Visual hierarchy and composition
+- Each screen gets one clear order:
+  - First, the big headline.
+  - Second, the supporting line.
+  - Third, the small labels and buttons.
+- Line text up on a shared grid with steady margins on the left and right. The scene label, headline and description stack in the same place on every screen.
+- Speakers screen: the speaker photo is the hero in the centre and the screen text sits faintly behind it. Name and buttons get quiet corners, so nothing competes.
+- Make the small side labels and the "scroll" hint dimmer and smaller, so they never fight with the headline.
