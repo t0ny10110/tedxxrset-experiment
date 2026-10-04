@@ -15,34 +15,25 @@ function clamp(value: number) {
 }
 
 function LoadingOverlay({ progress, isDone }: { progress: number; isDone: boolean }) {
-  const getStatusText = (p: number) => {
-    if (p < 30) return "Initializing 3D Stage...";
-    if (p < 70) return "Preloading Speaker Assets...";
-    if (p < 99) return "Preparing Cinematic Experience...";
-    return "Ready to Enter";
-  };
-
   return (
     <AnimatePresence>
       {!isDone && (
         <motion.div
           className="loading-overlay"
           initial={{ opacity: 1 }}
-          exit={{ opacity: 0, transition: { duration: 0.7, ease: [0.22, 1, 0.36, 1] } }}
+          exit={{ opacity: 0, transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] } }}
         >
           <div className="loading-content">
             <div className="loading-brand">
               <strong className="brand-ted">TED<span className="brand-x">x</span></strong>
               <span className="brand-name">Rajagiri</span>
             </div>
-            <p className="loading-tagline">IDEAS IN MOTION · 16 JANUARY 2027</p>
 
             <div className="loading-progress-container">
               <div className="loading-progress-bar" style={{ width: `${progress}%` }} />
             </div>
 
             <div className="loading-meta">
-              <span className="loading-status">{getStatusText(progress)}</span>
               <span className="loading-percentage">{progress}%</span>
             </div>
           </div>
@@ -289,7 +280,7 @@ export function EventExperience() {
               style={{
                 opacity,
                 transform: `translate3d(0, ${direction * -48}px, 0) scale(${1 - Math.min(distance, 1) * 0.045})`,
-                filter: `blur(${Math.min(distance * 10, 10)}px)`
+                filter: activeScene === index ? "none" : `blur(${Math.min(distance * 8, 8)}px)`
               }}
             >
               <div className="scene-copy">
@@ -320,9 +311,9 @@ export function EventExperience() {
                         onPointerEnter={() => setHover(true)}
                         onPointerLeave={() => setHover(false)}
                         variants={{
-                          enter: (d: number) => ({ opacity: 0, x: `${d * 14}vw`, filter: "blur(10px)" }),
-                          center: { opacity: 1, x: "0vw", filter: "blur(0px)", transition: FADE },
-                          exit: (d: number) => ({ opacity: 0, x: `${d * -14}vw`, filter: "blur(10px)", transition: FADE })
+                          enter: (d: number) => ({ opacity: 0, x: `${d * 14}vw` }),
+                          center: { opacity: 1, x: "0vw", transition: FADE },
+                          exit: (d: number) => ({ opacity: 0, x: `${d * -14}vw`, transition: FADE })
                         }}
                         initial="enter"
                         animate="center"

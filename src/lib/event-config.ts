@@ -1,11 +1,7 @@
-import anikaPortrait from "@/assets/speaker-anika.png";
-import eliasPortrait from "@/assets/speaker-elias.png";
-import speaker3 from "@/assets/speaker-3.png";
-import speaker4 from "@/assets/speaker-4.png";
-import speaker5 from "@/assets/speaker-5.png";
-import speaker6 from "@/assets/speaker-6.png";
-import speaker7 from "@/assets/speaker-7.png";
-
+import dulquerPortrait from "@/assets/speaker-dulquer.png";
+import fahadhPortrait from "@/assets/speaker-fahadh.png";
+import mohanlalPortrait from "@/assets/speaker-mohanlal.png";
+import mammoottyPortrait from "@/assets/speaker-mammootty.png";
 
 export type Speaker = {
   id: string;
@@ -33,67 +29,67 @@ export const eventConfig = {
   ],
   speakers: [
     {
-      id: "anika-rao",
-      name: "Speaker 1",
-      role: "Speaker profile coming soon",
+      id: "dulquer-salmaan",
+      name: "Dulquer Salmaan",
+      role: "Actor & Film Producer",
       talk: "An idea ready to take the stage",
       manifesto: "A new perspective begins with one brave question.",
-      bio: "The first speaker announcement for TEDx Rajagiri is coming soon.",
-      portrait: anikaPortrait,
+      bio: "Dulquer Salmaan is an acclaimed actor and film producer known for pushing creative boundaries across Indian cinema.",
+      portrait: dulquerPortrait,
     },
     {
-      id: "elias-cole",
-      name: "Speaker 2",
-      role: "Speaker profile coming soon",
+      id: "fahadh-faasil",
+      name: "Fahadh Faasil",
+      role: "National Award Winning Actor",
       talk: "A story that changes the room",
       manifesto: "The right idea keeps moving long after the lights fade.",
-      bio: "The second speaker announcement for TEDx Rajagiri is coming soon.",
-      portrait: eliasPortrait,
+      bio: "Fahadh Faasil is a celebrated National Award-winning actor renowned for his intense performances and cinematic vision.",
+      portrait: fahadhPortrait,
     },
     {
-      id: "speaker-3",
-      name: "Speaker 3",
-      role: "Speaker profile coming soon",
+      id: "mohanlal",
+      name: "Mohanlal",
+      role: "Iconic Cinema Legend & Director",
       talk: "The future we haven't imagined yet",
       manifesto: "Every big change starts as a small, strange idea.",
-      bio: "The third speaker announcement for TEDx Rajagiri is coming soon.",
-      portrait: speaker3,
+      bio: "Mohanlal Viswanathan is one of Indian cinema's greatest legends, spanning over four decades of transformative storytelling.",
+      portrait: mohanlalPortrait,
     },
     {
-      id: "speaker-4",
-      name: "Speaker 4",
-      role: "Speaker profile coming soon",
+      id: "mammootty",
+      name: "Mammootty",
+      role: "Padma Shri & Veteran Actor",
       talk: "Designing for the people left out",
       manifesto: "Better ideas begin by asking who is missing.",
-      bio: "The fourth speaker announcement for TEDx Rajagiri is coming soon.",
-      portrait: speaker4,
+      bio: "Mammootty is a Padma Shri recipient and titan of Indian cinema, inspiring generations through groundbreaking art.",
+      portrait: mammoottyPortrait,
     },
     {
-      id: "speaker-5",
-      name: "Speaker 5",
-      role: "Speaker profile coming soon",
+      id: "dulquer-salmaan-2",
+      name: "Dulquer Salmaan",
+      role: "Keynote Speaker",
       talk: "What science still can't explain",
       manifesto: "Curiosity is the oldest engine of progress.",
-      bio: "The fifth speaker announcement for TEDx Rajagiri is coming soon.",
-      portrait: speaker5,
+      bio: "Exploring how art and storytelling bridge the gap between imagination and technological innovation.",
+      portrait: dulquerPortrait,
     },
     {
-      id: "speaker-6",
-      name: "Speaker 6",
-      role: "Speaker profile coming soon",
+      id: "fahadh-faasil-2",
+      name: "Fahadh Faasil",
+      role: "Keynote Speaker",
       talk: "Leading when the map runs out",
       manifesto: "Courage is choosing to move before you are certain.",
-      bio: "The sixth speaker announcement for TEDx Rajagiri is coming soon.",
-      portrait: speaker6,
+      bio: "Navigating unchartered creative paths and redefining the modern storytelling landscape.",
+      portrait: fahadhPortrait,
     },
     {
-      id: "speaker-7",
-      name: "Speaker 7",
-      role: "Speaker profile coming soon",
+      id: "mohanlal-2",
+      name: "Mohanlal",
+      role: "Honorary Speaker",
       talk: "Building with nothing but nerve",
       manifesto: "Start with what you have. The rest follows.",
-      bio: "The seventh speaker announcement for TEDx Rajagiri is coming soon.",
-      portrait: speaker7,
+      bio: "Reflections on passion, persistence, and decades of mastery on stage and screen.",
+      portrait: mohanlalPortrait,
     },
   ] satisfies Speaker[],
   scenes: [
