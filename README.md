@@ -24,7 +24,7 @@ INTERACTION & MOTION DESIGN:
 
 This project was built with [Lovable](https://lovable.dev).
 
-**Live app**: https://tedx-rset-test.lovable.app
+**Live app**: https://t0ny10110.github.io/tedxxrset-experiment/
 
 ## Build with Lovable
 
